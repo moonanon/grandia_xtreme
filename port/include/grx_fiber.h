@@ -22,4 +22,10 @@ void grx_fiber_switch(GrxFiber *to);
 /* Free a context that isn't running. Deleting the main one is ignored. */
 void grx_fiber_delete(GrxFiber *f);
 
+#ifndef _WIN32
+/* Run fn(argc, argv) on a stack below 2 GB (the game's addresses are 32-bit):
+   what main() does first on POSIX. Returns fn's result. */
+int grx_run_on_low_stack(int (*fn)(int, char **), int argc, char **argv);
+#endif
+
 #endif

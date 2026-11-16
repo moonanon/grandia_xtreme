@@ -1,3 +1,4 @@
+#ifdef _WIN32
 /* Windows fibers behind grx_fiber.h, the EE kernel's thread contexts.
    This file may include <windows.h>; kernel.c (which defines the game's
    CreateThread, the EE kernel call) must not. */
@@ -88,3 +89,5 @@ void grx_fiber_delete(GrxFiber *f) {
     DeleteFiber(f->handle);
     free(f);
 }
+
+#endif /* _WIN32 */

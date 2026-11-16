@@ -208,7 +208,24 @@ const char gsgl_draw_fs[] =
     "    return ivec2(wrapc(t.x, u_tw.x, sz.x - 1, u_reg.x, u_reg.y), wrapc(t.y, u_tw.y, sz.y - 1, u_reg.z, u_reg.w));\n"
     "}\n"
     "vec4 fetch(ivec2 t) { return texelFetch(u_tex, ivec2((vec2(t) + u_toff.xy) * (u_tsz.z > 1.5 ? vec2(u_scale) : vec2(1.0))), 0); }\n"
+    /* A replacement (u_tsz.z < 0): any size, a multiple of the texture's.
+       The coordinates are in the original's texels; the wrapping is done on
+       them, the sampler then reads in normalised ones. Its alpha is the GS's
+       (128 opaque), as in the PCSX2 packs of its time: no correction. */
+    "vec4 sample_rep(vec2 uv) {\n"
+    "    vec2 c = uv;\n"
+    "    if (u_tw.x == 0) c.x = mod(c.x, u_tsz.x);\n"
+    "    else if (u_tw.x == 1) c.x = clamp(c.x, 0.0, u_tsz.x);\n"
+    "    else if (u_tw.x == 2) c.x = clamp(c.x, float(u_reg.x), float(u_reg.y) + 1.0);\n"
+    "    else c.x = float((int(floor(c.x)) & u_reg.x) | u_reg.y) + fract(c.x);\n"
+    "    if (u_tw.y == 0) c.y = mod(c.y, u_tsz.y);\n"
+    "    else if (u_tw.y == 1) c.y = clamp(c.y, 0.0, u_tsz.y);\n"
+    "    else if (u_tw.y == 2) c.y = clamp(c.y, float(u_reg.z), float(u_reg.w) + 1.0);\n"
+    "    else c.y = float((int(floor(c.y)) & u_reg.z) | u_reg.w) + fract(c.y);\n"
+    "    return texture(u_tex, c * u_toff.zw);\n"
+    "}\n"
     "vec4 sample_tex(vec2 uv) {\n"
+    "    if (u_tsz.z < 0.0) return sample_rep(uv);\n"
     "    if (u_tw.z == 0) return fetch(wrap2(ivec2(floor(uv))));\n"
     "    if (u_tw.x == 3 || u_tw.y == 3 || (u_tsz.w != 0.0 && (u_tw.x == 0 || u_tw.y == 0))) {\n"
     /* region repeat (and repeat on a target): four texels, wrapped one by one */
@@ -238,7 +255,11 @@ const char gsgl_draw_fs[] =
     "    vec4 c = clamp(floor((u_tw.w != 0 ? v_col : v_fcol) + 0.001), 0.0, 255.0);\n"
     "    if (u_tf.x != 0) {\n"
     "        vec2 uv = u_tf.w != 0 ? v_stq.xy : v_stq.xy / v_stq.z * u_tsz.xy;\n"
-    "        uv = clamp(clamp(uv, v_cl.xy, v_cl.zw), vec2(-1.0e6), vec2(1.0e6));\n"
+    /* v_cl is the uv at the first and last pixel centres; a replacement
+       (finer than a texel) is sampled up to the sprite's edges, else each
+       strip of a strip-drawn sprite shows a flat band at its edges */
+    "        vec2 h = u_tsz.z < 0.0 ? 0.5 * fwidth(uv) : vec2(0.0);\n"
+    "        uv = clamp(clamp(uv, v_cl.xy - h, v_cl.zw + h), vec2(-1.0e6), vec2(1.0e6));\n"
     /* (the GS's bilinear filter truncates; whole texels are exact either way) */
     "        vec4 t = floor(sample_tex(uv) * 255.0 + (u_tw.z != 0 ? 0.004 : 0.5));\n"
     "        vec3 m = floor(t.rgb * c.rgb / 128.0);\n"

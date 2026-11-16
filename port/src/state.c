@@ -30,8 +30,13 @@
  * of zeros and literals (the heaps are mostly zeros).
  */
 #define WIN32_LEAN_AND_MEAN
+#ifdef _WIN32
 #include <windows.h>
 #include <io.h>
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -153,12 +158,12 @@ static void say(const char *fmt, ...) {
     va_start(ap, fmt);
     vsnprintf(message, sizeof(message), fmt, ap);
     va_end(ap);
-    message_ms = GetTickCount64();
+    message_ms = SDL_GetTicks();
     grx_log("state: %s", message);
 }
 
 const char *grx_state_message(void) {
-    return message[0] && GetTickCount64() - message_ms < 3000 ? message : NULL;
+    return message[0] && SDL_GetTicks() - message_ms < 3000 ? message : NULL;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -166,6 +171,7 @@ const char *grx_state_message(void) {
 
 static uint64_t build_id;
 
+#ifdef _WIN32
 static void exe_info(void) {
     const uint8_t *base;
     const IMAGE_NT_HEADERS *nt;
@@ -189,6 +195,22 @@ static void exe_info(void) {
     }
     build_id ^= (uint64_t)nt->OptionalHeader.SizeOfImage << 1;
 }
+#else
+extern const char __executable_start[], etext[];
+
+static void exe_info(void) {
+    const uint8_t *p = (const uint8_t *)__executable_start;
+    size_t n = (size_t)(etext - __executable_start), k;
+    if (build_id) {
+        return;
+    }
+    build_id = 0xCBF29CE484222325ull; /* FNV-1a over the code */
+    for (k = 0; k < n; k++) {
+        build_id = (build_id ^ p[k]) * 0x100000001B3ull;
+    }
+    build_id ^= (uint64_t)n << 1;
+}
+#endif
 
 /* ---------------------------------------------------------------------- */
 /* The memory saved as it is */
@@ -281,7 +303,23 @@ int grx_state_run_game(int (*entry)(int, char **), int argc, char **argv) {
    After a load those are the saved run's. */
 void grx_state_point(void);
 void grx_state_run(uintptr_t boundary);
-#if defined(_WIN64)
+#if !defined(_WIN32) && defined(__x86_64__)
+/* System V: only rbx, rbp and r12-r15 are callee-saved, no xmm */
+__asm__(".text\n"
+        ".globl grx_state_point\n"
+        ".type grx_state_point, @function\n"
+        "grx_state_point:\n"
+        "  pushq %rbp\n  pushq %rbx\n  pushq %r12\n  pushq %r13\n  pushq %r14\n  pushq %r15\n"
+        "  subq $8, %rsp\n"
+        "  movq %rsp, %rdi\n"
+        "  call grx_state_run\n"
+        "  addq $8, %rsp\n"
+        "  popq %r15\n  popq %r14\n  popq %r13\n  popq %r12\n  popq %rbx\n  popq %rbp\n"
+        "  ret\n"
+        ".size grx_state_point, .-grx_state_point\n"
+        ".section .note.GNU-stack,\"\",@progbits\n"
+        ".text\n");
+#elif defined(_WIN64)
 __asm__(".text\n"
         ".globl grx_state_point\n"
         ".def grx_state_point; .scl 2; .type 32; .endef\n"
@@ -443,7 +481,11 @@ static int write_file(int slot, const GrxState *s) {
     char dir[1024];
     FILE *f;
     snprintf(dir, sizeof(dir), "%ssavestates", exe ? exe : "");
+    #ifdef _WIN32
     CreateDirectoryA(dir, NULL);
+#else
+    mkdir(dir, 0777);
+#endif
     path_of(slot, path, sizeof(path));
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
@@ -454,7 +496,12 @@ static int write_file(int slot, const GrxState *s) {
        CRT's buffered tail fails at fflush/fclose, and a short .tmp would
        replace a good state */
     if (fwrite(s->buf, 1, s->len, f) != s->len || fflush(f) != 0 ||
-        !FlushFileBuffers((HANDLE)_get_osfhandle(_fileno(f)))) {
+#ifdef _WIN32
+        !FlushFileBuffers((HANDLE)_get_osfhandle(_fileno(f)))
+#else
+        fsync(fileno(f)) != 0
+#endif
+        ) {
         fclose(f);
         remove(tmp);
         return 0;
@@ -463,7 +510,11 @@ static int write_file(int slot, const GrxState *s) {
         remove(tmp);
         return 0;
     }
+#ifdef _WIN32
     return MoveFileExA(tmp, path, MOVEFILE_REPLACE_EXISTING) != 0;
+#else
+    return rename(tmp, path) == 0;
+#endif
 }
 
 /* ---------------------------------------------------------------------- */

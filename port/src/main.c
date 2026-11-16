@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "grx_fiber.h"
 #include "grx_platform.h"
 #include "grx_hwmem.h"
 #include "grx_kernel.h"
@@ -242,7 +243,16 @@ static int pad_test(void) {
     }
 }
 
+#ifdef _WIN32
+int main(int argc, char **argv)
+#else
+static int grx_main(int argc, char **argv);
 int main(int argc, char **argv) {
+    return grx_run_on_low_stack(grx_main, argc, argv);
+}
+static int grx_main(int argc, char **argv)
+#endif
+{
     GrxVideoConfig vc;
     const char *mode = NULL, *renderer = NULL, *aspect = NULL, *draw_dist = NULL, *buttons = NULL, *camera = NULL;
     const char *scene_skip = NULL, *hud = NULL;

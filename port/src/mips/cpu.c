@@ -630,7 +630,7 @@ static inline uint32_t fout(float r) {
     return x.u;
 }
 
-static inline uint32_t fdiv(GrxMipsFpr a, GrxMipsFpr b) {
+static inline uint32_t ee_fdiv(GrxMipsFpr a, GrxMipsFpr b) {
     float y = fin(b);
     if (y == 0.0f) {
         return ((a.u ^ b.u) & 0x80000000u) | 0x7F7FFFFFu;
@@ -1043,7 +1043,7 @@ static void exec(GrxMipsCpu *c, uint32_t w, uint32_t pc) {
             case 0x00: c->f[fd].u = fout(a + b); return;
             case 0x01: c->f[fd].u = fout(a - b); return;
             case 0x02: c->f[fd].u = fout(a * b); return;
-            case 0x03: c->f[fd].u = fdiv(c->f[fs], c->f[ft]); return;
+            case 0x03: c->f[fd].u = ee_fdiv(c->f[fs], c->f[ft]); return;
             case 0x04: c->f[fd].u = fout(sqrtf(fabsf(b))); return;
             case 0x05: c->f[fd].u = c->f[fs].u & 0x7FFFFFFFu; return;
             case 0x06: c->f[fd].u = c->f[fs].u; return;
@@ -1051,7 +1051,7 @@ static void exec(GrxMipsCpu *c, uint32_t w, uint32_t pc) {
             case 0x16: { /* rsqrt.s fd, fs, ft */
                 GrxMipsFpr r;
                 r.f = sqrtf(fabsf(b));
-                c->f[fd].u = fdiv(c->f[fs], r);
+                c->f[fd].u = ee_fdiv(c->f[fs], r);
                 return;
             }
             case 0x18: c->facc.u = fout(a + b); return;

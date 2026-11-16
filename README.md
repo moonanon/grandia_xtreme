@@ -187,6 +187,34 @@ Keys of the port's own, which can't be remapped:
 | F9 | freeze the game and write a dump to `build/freeze/` (F9 again resumes) |
 | F10 | while frozen, run one field |
 
+## Linux (native)
+
+```sh
+python3 port/tools/build.py --target linux64 -j$(nproc)   # build/portlinux/grandia
+./grandia-xtreme      # boots the first .iso in iso/ or disc/; or pass --disc PATH
+```
+
+`./grandia-xtreme` runs `build/portlinux/grandia` from the repository root, where it
+finds `textures/`.
+
+Needs clang, lld and SDL3 (for example Homebrew's `llvm`, `lld` and `sdl3`, or your
+distribution's), after the decompilation's build above has run once. Run it from a
+Wayland or X11 session with OpenGL 3.3.
+
+## HD texture packs
+
+PCSX2 texture replacement packs (DDS files named `<hash>-<hash>-<bits>.dds`)
+are drawn in place of the game's textures, e.g. the HD pack and the widescreen
+UI pack by Panda_Venom and 1vierock. Put each pack's `replacements/` folder (or
+a symlink to it) in `textures/`; the folders are read in name order and, for a
+texture in several, the first folder's file wins:
+
+    textures/01-widescreen/   # Grnd_X_Widescreen_replacements.7z
+    textures/02-hd/           # .../PCSX2/textures/SLUS-20417/replacements
+
+`GRX_TEXTURES=dir1:dir2` (`;` on Windows) lists folders instead. The packs'
+files are not included (`textures/` is git-ignored).
+
 ## Layout
 
 | Path | What |

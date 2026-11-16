@@ -12,9 +12,36 @@
    The server takes one client at a time on 127.0.0.1, one line per
    request, one line of JSON per answer. Its thread only moves the lines:
    the requests run on the game thread (grx_dbg_poll), between fields. */
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#else
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+typedef int SOCKET;
+typedef struct { int unused; } WSADATA;
+#define INVALID_SOCKET (-1)
+#define closesocket close
+#define MAKEWORD(a, b) 0
+#define WSAStartup(v, d) 0
+#define WSAGetLastError() errno
+#include <sched.h>
+#include <sys/stat.h>
+#include <sys/uio.h>
+typedef int LONG;
+#define InterlockedExchange(p, v) __atomic_exchange_n((p), (v), __ATOMIC_SEQ_CST)
+#define SwitchToThread() sched_yield()
+#define InterlockedIncrement(p) (__atomic_add_fetch((p), 1, __ATOMIC_SEQ_CST))
+#define InterlockedDecrement(p) (__atomic_sub_fetch((p), 1, __ATOMIC_SEQ_CST))
+#define _strdup strdup
+extern const char __executable_start[];
+#define GetModuleHandleA(x) ((void *)__executable_start)
+#define CreateDirectoryA(d, a) mkdir((d), 0777)
+#endif
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -332,13 +359,23 @@ static int dump_pictures(const char *dir) {
 /* Memory */
 
 static int mem_read(uintptr_t addr, void *buf, size_t n) {
+#ifdef _WIN32
     SIZE_T got = 0;
     return ReadProcessMemory(GetCurrentProcess(), (LPCVOID)addr, buf, n, &got) && got == n ? 0 : -1;
+#else
+    struct iovec l = {buf, n}, r = {(void *)addr, n};
+    return process_vm_readv(getpid(), &l, 1, &r, 1, 0) == (ssize_t)n ? 0 : -1;
+#endif
 }
 
 static int mem_write(uintptr_t addr, const void *buf, size_t n) {
+#ifdef _WIN32
     SIZE_T put = 0;
     return WriteProcessMemory(GetCurrentProcess(), (LPVOID)addr, buf, n, &put) && put == n ? 0 : -1;
+#else
+    struct iovec l = {(void *)buf, n}, r = {(void *)addr, n};
+    return process_vm_writev(getpid(), &l, 1, &r, 1, 0) == (ssize_t)n ? 0 : -1;
+#endif
 }
 
 /* Copy [base, base + size) to f, skipping what can't be read (zeros) */
@@ -357,13 +394,23 @@ static void dump_range(FILE *f, FILE *idx, const char *name, uintptr_t base, siz
     *off += (long long)size;
 }
 
+#ifndef _WIN32
+extern char grx_state_data_begin[16], grx_state_data_end[16];
+extern char grx_state_bss_begin[16], grx_state_bss_end[16];
+extern const char __executable_start[];
+#endif
+
 static void dump_memory(const char *dir) {
     char path[700];
     FILE *f, *idx;
     long long off = 0;
+#ifdef _WIN32
     unsigned char *base = (unsigned char *)GetModuleHandleA(NULL);
     IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(base + ((IMAGE_DOS_HEADER *)base)->e_lfanew);
     IMAGE_SECTION_HEADER *sec = IMAGE_FIRST_SECTION(nt);
+#else
+    unsigned char *base = (unsigned char *)__executable_start;
+#endif
     int i;
 
     snprintf(path, sizeof(path), "%s/memory.bin", dir);
@@ -376,6 +423,7 @@ static void dump_memory(const char *dir) {
         return;
     }
     fprintf(idx, "# name host_address size offset_in_memory.bin; image base 0x%08llx\n", (unsigned long long)(uintptr_t)base);
+#ifdef _WIN32
     for (i = 0; i < nt->FileHeader.NumberOfSections; i++) {
         char name[16];
         if (!(sec[i].Characteristics & IMAGE_SCN_MEM_WRITE)) {
@@ -384,6 +432,11 @@ static void dump_memory(const char *dir) {
         snprintf(name, sizeof(name), "exe%.8s", (const char *)sec[i].Name);
         dump_range(f, idx, name, (uintptr_t)base + sec[i].VirtualAddress, sec[i].Misc.VirtualSize, &off);
     }
+#else
+    /* the game's data and bss: what the save states copy */
+    dump_range(f, idx, "exedata", (uintptr_t)grx_state_data_begin, (size_t)(grx_state_data_end + 16 - grx_state_data_begin), &off);
+    dump_range(f, idx, "exebss", (uintptr_t)grx_state_bss_begin, (size_t)(grx_state_bss_end + 16 - grx_state_bss_begin), &off);
+#endif
     for (i = 0; i < GRX_AREA_COUNT; i++) {
         static const char *const names[GRX_AREA_COUNT] = {"ini_buf", "mfifo", "battle_heap", "face_heap", "heap7"};
         if (i == GRX_AREA_MFIFO_RING) {
@@ -441,7 +494,11 @@ static const char *dump(const char *where) {
     if (where != NULL && *where) {
         snprintf(dir, sizeof(dir), "%s", where);
     } else {
+#ifdef _WIN32
         localtime_s(&tm, &t);
+#else
+        localtime_r(&t, &tm);
+#endif
         snprintf(dir, sizeof(dir), "%s/%04d%02d%02d-%02d%02d%02d-f%llu", dump_root, tm.tm_year + 1900, tm.tm_mon + 1,
                  tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, (unsigned long long)field_now);
     }
@@ -485,7 +542,13 @@ static const char *dump(const char *where) {
     if (f != NULL) {
         fprintf(f, "field %llu\nrenderer %s\naspect %.4f\ndraw_distance %g\nimage_base 0x%08llx\npictures %d\n",
                 (unsigned long long)field_now, gs_backend != NULL ? "gl" : "software", grx_ws_aspect(),
-                grx_draw_distance(), (unsigned long long)(uintptr_t)GetModuleHandleA(NULL), npic);
+                grx_draw_distance(), 
+#ifdef _WIN32
+                (unsigned long long)(uintptr_t)GetModuleHandleA(NULL),
+#else
+                (unsigned long long)(uintptr_t)__executable_start,
+#endif
+                npic);
         fclose(f);
     }
     snprintf(last_dump, sizeof(last_dump), "%s", dir);

@@ -40,6 +40,8 @@
 #include "grx_video_opts.h"
 #include "../gs/gs_internal.h"
 #include "../gs/gs_draw.h"
+#include "../gs/gs_texhash.h"
+#include "gsgl_replace.h"
 
 extern const char gsgl_vram_glsl[], gsgl_quad_vs[], gsgl_decode_fs[], gsgl_load_fs[], gsgl_loadz_fs[],
     gsgl_resolve_fs[], gsgl_draw_vs[], gsgl_draw_fs[], gsgl_compose_vs[], gsgl_compose_fs[], gsgl_copy_fs[];
@@ -80,7 +82,7 @@ typedef struct Prog {
 
 static Prog p_draw, p_decode, p_load, p_loadz, p_resolve, p_compose, p_copy;
 static GLuint vram_tex, vram_fbo, sw_tex, inv_tex, clut_tex, vao, vbo, empty_vao;
-static GLuint samp[5]; /* decoded: [wrap s repeat?][wrap t repeat?] as 0..3; 4: a target (clamped) */
+static GLuint samp[6]; /* decoded: [wrap s repeat?][wrap t repeat?] as 0..3; 4: a target (clamped); 5: a replacement (mipmapped, wrapped in the shader) */
 static GLuint draw_fbo;
 static GLuint copy_tex, copy_fbo;
 static int copy_w, copy_h;
@@ -577,10 +579,12 @@ typedef struct TexE {
     uint32_t key[6]; /* tbp, tbw, psm, tw | th << 8, texa (16/24-bit), CLUT hash (indexed) */
     uint32_t stamp, used;
     GLuint tex, fbo;
+    GLuint rep; /* its replacement (gsgl_replace.c), or 0 */
     int w, h;
     GsPages pages;
 } TexE;
 static TexE texc[NTEX];
+static int tex_is_rep; /* what texture_from_memory returned is a replacement */
 static uint32_t tex_clock;
 
 static uint32_t hash_words(const uint32_t *w, int n) {
@@ -633,11 +637,14 @@ static GLuint texture_from_memory(const GsDraw *D) {
     x = e >= 0 ? &texc[e] : &texc[lru];
     x->used = ++tex_clock;
     if (e >= 0 && pages_current(&x->pages, x->stamp)) {
-        return x->tex;
+        tex_is_rep = x->rep != 0;
+        return x->rep ? x->rep : x->tex;
     }
     /* Decode: the mirror must have the pages */
     pages_to_want(&D->rtex, want);
     mirror_ready(want);
+    gs_texhash_log(t);
+    x->rep = gsgl_rep_lookup(t);
     if (e < 0) {
         memcpy(x->key, key, sizeof(key));
         x->pages = D->rtex;
@@ -678,7 +685,8 @@ static GLuint texture_from_memory(const GsDraw *D) {
     glUniform4i(p_decode.texa, (GLint)t->ta0, (GLint)t->ta1, (GLint)t->aem, 0);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     nstat[S_DECODES]++;
-    return x->tex;
+    tex_is_rep = x->rep != 0;
+    return x->rep ? x->rep : x->tex;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1121,12 +1129,12 @@ static void setup_texture(const GsVertex *v, int nv) {
     s->tex = texture_from_memory(D);
     s->texw = 1 << D->t.tw;
     s->texh = 1 << D->t.th;
-    s->tsz[2] = 1.0f;
+    s->tsz[2] = tex_is_rep ? -1.0f : 1.0f; /* -1: a replacement, sampled by normalised coordinates */
     s->tsz[3] = 0.0f;
     s->toff[0] = s->toff[1] = 0.0f;
     s->toff[2] = 1.0f / (float)s->texw;
     s->toff[3] = 1.0f / (float)s->texh;
-    s->samp = (D->t.wms == 0 ? 0 : 1) | (D->t.wmt == 0 ? 0 : 2);
+    s->samp = tex_is_rep ? 5 : (D->t.wms == 0 ? 0 : 1) | (D->t.wmt == 0 ? 0 : 2);
 }
 
 static const float no_clamp[4] = {-1.0e7f, -1.0e7f, 1.0e7f, 1.0e7f};
@@ -1919,6 +1927,7 @@ int grx_gs_gl_init(void) {
     if (grx_gl_load() != 0) {
         return -1;
     }
+    gsgl_rep_init();
     if (glTextureBarrier == NULL) {
         grx_log("gs-gl: no GL_ARB_texture_barrier: the destination alpha test will be off");
     }
@@ -1973,9 +1982,9 @@ int grx_gs_gl_init(void) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     clut_tex = new_tex(GL_RGBA8, 256, 1, GL_RGBA, GL_UNSIGNED_BYTE);
 
-    glGenSamplers(5, samp);
-    for (i = 0; i < 5; i++) {
-        glSamplerParameteri(samp[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glGenSamplers(6, samp);
+    for (i = 0; i < 6; i++) {
+        glSamplerParameteri(samp[i], GL_TEXTURE_MIN_FILTER, i == 5 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         glSamplerParameteri(samp[i], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glSamplerParameteri(samp[i], GL_TEXTURE_WRAP_S, i < 4 && !(i & 1) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
         glSamplerParameteri(samp[i], GL_TEXTURE_WRAP_T, i < 4 && !(i & 2) ? GL_REPEAT : GL_CLAMP_TO_EDGE);

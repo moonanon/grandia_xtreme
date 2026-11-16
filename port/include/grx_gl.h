@@ -98,6 +98,11 @@ typedef struct __GLsync *GLsync;
 #define GL_FUNC_SUBTRACT 0x800A
 #define GL_FUNC_REVERSE_SUBTRACT 0x800B
 #define GL_TEXTURE_MAX_LEVEL 0x813D
+#define GL_LINEAR_MIPMAP_LINEAR 0x2703
+/* GL_EXT_texture_compression_s3tc, for the texture replacements (gsgl_replace.c) */
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
 #define GL_DEPTH_COMPONENT32F 0x8CAC
 #define GL_DEPTH_ATTACHMENT 0x8D00
 #define GL_ARRAY_BUFFER 0x8892
@@ -147,6 +152,9 @@ typedef struct __GLsync *GLsync;
     X(void, TexSubImage2D,                                                                                        \
       (GLenum target, GLint level, GLint x, GLint y, GLsizei w, GLsizei h, GLenum format, GLenum type,            \
        const void *pixels))                                                                                       \
+    X(void, CompressedTexImage2D,                                                                                 \
+      (GLenum target, GLint level, GLenum internalformat, GLsizei w, GLsizei h, GLint border, GLsizei imageSize,  \
+       const void *data))                                                                                         \
     X(void, GenSamplers, (GLsizei n, GLuint *samplers))                                                           \
     X(void, DeleteSamplers, (GLsizei n, const GLuint *samplers))                                                  \
     X(void, BindSampler, (GLuint unit, GLuint sampler))                                                           \

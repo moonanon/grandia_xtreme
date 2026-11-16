@@ -42,3 +42,7 @@ tools/compilers/
 
 # The port's third-party libraries (SDL3, see port/README.md)
 port/deps/
+
+# Texture packs (copyrighted, large): see README
+textures/*
+!textures/README.md

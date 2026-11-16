@@ -418,3 +418,8 @@ Sony's libmpeg decoder runs on the IPU and is Sony's own code; it follows
 `mpeg2decode`'s structure and names (5 files follow `getpic.c`,
 `recon.c` and `motion.c` directly), so how much of the MSSG notice applies
 is a judgement call: keep the notice with those 61 files.
+
+## xxHash
+
+`port/third_party/xxhash/` is xxHash v0.8.3 by Yann Collet (BSD 2-Clause,
+license in the folder's header), used for PCSX2's texture replacement names.

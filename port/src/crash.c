@@ -1,3 +1,4 @@
+#ifdef _WIN32
 /* Crash reports: on an access violation (most often the game touching a
    PS2 hardware address the port doesn't handle yet), print where it
    happened and the code addresses on the stack, for llvm-symbolizer. */
@@ -317,3 +318,5 @@ void grx_profile_start(void) {
     atexit(profile_write);
     CloseHandle(CreateThread(NULL, 0, profiler, NULL, 0, NULL));
 }
+
+#endif /* _WIN32 */

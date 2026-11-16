@@ -43,20 +43,25 @@ BINARIES = ["main", "field", "battle", "viewer"]
 TARGETS = {
     "i686": {"triple": "i686-w64-mingw32", "prefix": "_", "machine": "i386", "out": "port"},
     "x86_64": {"triple": "x86_64-w64-mingw32", "prefix": "", "machine": "i386:x86-64", "out": "port64"},
+    # Native Linux, x86-64: the same 32-bit-EE-address build as x86_64, ELF and glibc
+    "linux64": {"triple": "x86_64-unknown-linux-gnu", "prefix": "", "machine": "i386:x86-64", "out": "portlinux"},
 }
+LINUX = False
+EE64_TARGETS = ("x86_64", "linux64")
 TARGET = TARGETS["i686"]["triple"]
 OUT = os.path.join(ROOT, "build", TARGETS["i686"]["out"])
 
 
 def set_target(name):
-    global TARGET, OUT
+    global TARGET, OUT, LINUX
     t = TARGETS[name]
+    LINUX = name == "linux64"
     TARGET = t["triple"]
     OUT = os.path.join(ROOT, "build", t["out"])
     syms.PREFIX = t["prefix"]
     # The linker-defined names that move on x86-64 (port/tools/gen_bss64.py)
     syms.MOVED = {}
-    if name == "x86_64":
+    if name in EE64_TARGETS:
         with open(os.path.join(ROOT, "port", "tools", "fixups", "bss64.json")) as f:
             syms.MOVED = json.load(f)["aliases"]
 
@@ -167,9 +172,25 @@ _load_fixup_modules()
 VA_START = re.compile(r"#define\s+va_start\(\s*(\w+)\s*,\s*(\w+)\s*\)(?:[^\n]*\\\n)*[^\n]*")
 
 
+def brew_prefix():
+    """Homebrew's prefix (for clang and SDL3 when they aren't on the system), or ''"""
+    try:
+        return subprocess.run(["brew", "--prefix"], capture_output=True, text=True, check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+
+
+BREW = os.environ.get("HOMEBREW_PREFIX") or brew_prefix()
+
+
 def find_clang():
-    """llvm-mingw's <triple>-clang: GRX_CLANG (or its sibling for the other
+    """Linux: GRX_CLANG, clang on PATH or Homebrew's. Windows: llvm-mingw's <triple>-clang: GRX_CLANG (or its sibling for the other
     target), on PATH, or the winget install"""
+    if LINUX:
+        c = os.environ.get("GRX_CLANG") or shutil.which("clang") or os.path.join(BREW, "bin", "clang")
+        if not os.path.exists(c):
+            sys.exit("clang not found: install it (brew install llvm) or set GRX_CLANG")
+        return c
     c = os.environ.get("GRX_CLANG")
     if c:
         sib = os.path.join(os.path.dirname(c), f"{TARGET}-clang" + (".exe" if c.lower().endswith(".exe") else ""))
@@ -186,8 +207,19 @@ def find_clang():
 
 
 def find_sdl3():
-    """SDL3's mingw development tree for the target (port/README.md): GRX_SDL3,
+    """Linux: SDL3's install prefix (pkg-config, GRX_SDL3). Windows: SDL3's mingw development tree for the target (port/README.md): GRX_SDL3,
     or the newest port/deps/SDL3-*"""
+    if LINUX:
+        base = os.environ.get("GRX_SDL3")
+        if not base:
+            env = dict(os.environ, PKG_CONFIG_PATH=os.pathsep.join(
+                filter(None, [os.environ.get("PKG_CONFIG_PATH"), os.path.join(BREW, "lib", "pkgconfig")])))
+            p = subprocess.run(["pkg-config", "--variable=prefix", "sdl3"], capture_output=True, text=True, env=env)
+            base = p.stdout.strip() if p.returncode == 0 else None
+        if not base or not os.path.exists(os.path.join(base, "include", "SDL3", "SDL.h")):
+            sys.exit("SDL3 not found: install it (brew install sdl3, or your distro's SDL3 development package) "
+                     "or set GRX_SDL3 to its prefix")
+        return base
     base = os.environ.get("GRX_SDL3")
     if not base:
         found = sorted(glob.glob(os.path.join(ROOT, "port", "deps", "SDL3-*")))
@@ -204,6 +236,9 @@ def sdl3_delay_lib(clang, sdl):
     can't, and a static import loads user32/gdi32 before main(), which
     maps ~20 MB of low address space the PS2 memory needs
     (port/docs/hardware.md). Built from the DLL's exports."""
+    if LINUX:
+        lib = os.path.join(sdl, "lib")
+        return [f"-L{lib}", "-lSDL3", f"-Wl,-rpath,{lib}"]
     bindir = os.path.dirname(clang)
     dll = os.path.join(sdl, "bin", "SDL3.dll")
     lib = os.path.join(OUT, "libSDL3_delay.a")
@@ -426,6 +461,9 @@ def depfile_headers(dep):
     return [t for t in body.replace("\\\n", " ").split() if t.endswith(".h")]
 
 
+LINUX_FLAGS = ["-fno-pic", "-fno-pie", "-D_GNU_SOURCE", "-fno-stack-protector"]
+
+
 def compile_one(clang, src, obj, flags, deps):
     """Compile src to obj when it is older than src, the tools or the
     headers: those the last compile read (its .d file, clang -MD), or every
@@ -438,7 +476,7 @@ def compile_one(clang, src, obj, flags, deps):
         return obj, None
     os.makedirs(os.path.dirname(obj), exist_ok=True)
     clang = direct_clang(clang)
-    flags = flags + ["-MD", "-MF", dep]
+    flags = flags + ["-MD", "-MF", dep] + (LINUX_FLAGS if LINUX else [])
     key = None
     if "-fno-strict-float-cast-overflow" in flags:
         with open(src, "rb") as f:
@@ -712,11 +750,12 @@ def main():
         # The game's headers are on the path for the platform files that
         # implement game-named calls (kernel.c includes sdk/eekernel.h)
         jobs.append((p, obj, ["-I", "port/include", "-I", "include", "-I", os.path.join(sdl, "include"),
+                              "-I", "port/third_party/xxhash",
                               "-g", f"-O{opt}"] + PORT_FLAGS))
 
     lib_gen = {os.path.join(OUT, "gen", rel) for rel, _ in host_libs}
     port_jobs = jobs[len(game) + len(host_libs):]
-    if args.target == "x86_64":
+    if args.target in EE64_TARGETS:
         jobs = ee32_jobs(clang, jobs, args.jobs, lib_gen)
     lib_gen |= {os.path.join(OUT, "gen64", rel) for rel, _ in host_libs}
     lib_norm = {os.path.normcase(os.path.normpath(p)) for p in lib_gen}
@@ -736,7 +775,7 @@ def main():
                 sys.stderr.write(err)
             sys.exit(f"{len(errors)} of {len(jobs)} files failed to compile")
 
-    if args.target == "x86_64":
+    if args.target in EE64_TARGETS:
         with open(os.path.join(ROOT, "port", "tools", "fixups", "bss64.json")) as f:
             if json.load(f).get("headers") != headers_signature():
                 sys.exit("port/tools/fixups/bss64.json was measured against other headers (a type, a header "
@@ -760,7 +799,7 @@ def main():
     changed = sorted(set(extras) ^ set(new_extras) | {k for k in new_extras if extras.get(k) != new_extras[k]})
     if changed:
         extras = new_extras
-        if args.target == "x86_64":
+        if args.target in EE64_TARGETS:
             # The rewrite merges every source's edits (the headers'): all
             # again, cached but for these; only these are out of date
             again = [game_job(rel) for rel, _ in game + host_libs] + port_jobs
@@ -776,7 +815,7 @@ def main():
     host_objs = {obj_of[rel] for rel, _ in host_libs if rel in obj_of}
     lib_obj_paths = {os.path.join(OUT, "obj", rel[:-2] + ".o") for rel, _ in host_libs}
     objs = [o for _, o, _ in jobs if o not in lib_obj_paths]
-    exe = os.path.join(OUT, "grandia.exe")
+    exe = os.path.join(OUT, "grandia" if LINUX else "grandia.exe")
     stubs_c = os.path.join(OUT, "stubs.c")
     names.write_data_c(os.path.join(OUT, "linker_data.c"), defined)
     data_obj = os.path.join(OUT, "obj", "linker_data.o")
@@ -825,7 +864,24 @@ def main():
         rsp = os.path.join(OUT, "link.rsp")
         with open(rsp, "w") as f:
             f.write("\n".join(o.replace("\\", "/") for o in objs + [stub_obj, marks[1]]))
-        p = subprocess.run([clang, "-target", TARGET, "-o", exe, "@" + rsp, "-g",
+        if LINUX:
+            exports = os.path.join(OUT, "exports.map")
+            with open(exports, "w") as f:
+                f.write("{ local: *; };\n")
+            link_cmd = [clang, "-target", TARGET, "-o", exe, "@" + rsp, "-g", "-fuse-ld=lld", "-no-pie",
+                        "-Wl,--error-limit=0", "-Wl,-Map," + os.path.join(OUT, "grandia.map"),
+                        # Above the PS2's fixed addresses in the low 32 MB,
+                        # below 0x08000000, as on Windows; the stacks'
+                        # region (fiber_posix.c) is above it
+                        "-Wl,--image-base=0x04000000", "-Wl,-z,norelro", "-Wl,-z,noseparate-code",
+                        "-Wl,--no-gc-sections",
+                        # The game's C defines newlib's syscall stubs and errno
+                        # (read, write, close, rand, errno...): none may
+                        # preempt glibc's for the shared libraries
+                        "-Wl,--version-script=" + exports] + sdl_lib + ["-lm", "-ldl", "-lpthread"]
+        else:
+            link_cmd = None
+        p = subprocess.run(link_cmd or [clang, "-target", TARGET, "-o", exe, "@" + rsp, "-g",
                             "-Wl,--error-limit=0", "-Wl,-Map," + os.path.join(OUT, "grandia.map"),
                             # No ASLR: addresses in crash reports match the
                             # map, and the layout stays the same from run to run
@@ -861,7 +917,8 @@ def main():
     if problem:
         sys.exit(f"save states: {problem}")
     try:
-        shutil.copy2(os.path.join(sdl, "bin", "SDL3.dll"), os.path.join(OUT, "SDL3.dll"))
+        if not LINUX:
+            shutil.copy2(os.path.join(sdl, "bin", "SDL3.dll"), os.path.join(OUT, "SDL3.dll"))
     except PermissionError:
         # A running game has it open: it is the same file
         if not os.path.exists(os.path.join(OUT, "SDL3.dll")):
@@ -879,7 +936,9 @@ def check_state_order(map_path):
     platform = os.path.normcase(os.path.join(OUT, "obj", "port") + os.sep)
     game_port = os.path.normcase(os.path.join(OUT, "obj", "port", "game") + os.sep)
     secs = {".data": [], ".bss": []}
-    line_re = re.compile(r"^\s*[0-9a-f]+\s+([0-9a-f]+)\s+\d+\s+(.*):\((\.data|\.bss)\)\s*$")
+    # lld's COFF map: RVA, size, align; its ELF map: VMA, LMA, size, align
+    line_re = re.compile(r"^\s*[0-9a-f]+\s+[0-9a-f]+\s+([0-9a-f]+)\s+\d+\s+(.*):\((\.data|\.bss)\)\s*$" if LINUX
+                         else r"^\s*[0-9a-f]+\s+([0-9a-f]+)\s+\d+\s+(.*):\((\.data|\.bss)\)\s*$")
     with open(map_path, encoding="utf-8", errors="replace") as f:
         for line in f:
             m = line_re.match(line)

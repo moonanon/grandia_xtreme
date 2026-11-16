@@ -1,0 +1,17 @@
+#!/bin/sh
+# Runs the Linux build from the repository root (so ./textures is found).
+# Usage: ./grandia-xtreme [options]; with no --disc, the first .iso under iso/ or disc/
+cd "$(dirname "$0")" || exit 1
+exe=build/portlinux/grandia
+if [ ! -x "$exe" ]; then
+    echo "build it first: python3 port/tools/build.py --target linux64 -j\$(nproc)" >&2
+    exit 1
+fi
+case " $* " in
+*" --disc "*) exec "$exe" "$@" ;;
+esac
+iso=$(find iso disc -iname '*.iso' 2>/dev/null | head -n 1)
+if [ -z "$iso" ]; then
+    exec "$exe" "$@"
+fi
+exec "$exe" --boot --disc "$iso" "$@"

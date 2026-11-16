@@ -130,6 +130,11 @@ static uint32_t *pattern;
 
 static SDL_GLContext gl_ctx;          /* the presenter's */
 static SDL_GLContext shared_ctx[NSHARED];
+/* Each shared context has a window of its own off Windows: EGL lets a
+   window's surface be current on one thread only, and the presenter's
+   thread has the main window's. (WGL allows several contexts on one
+   window.) */
+static SDL_Window *shared_win[NSHARED];
 static int nshared;
 static int gl_up;                     /* presenting through GL */
 static int threaded;                  /* on the presenter thread (else on the game thread) */
@@ -405,6 +410,10 @@ void grx_video_shutdown(void) {
     grx_pad_shutdown();
     for (i = 0; i < nshared; i++) {
         SDL_GL_DestroyContext(shared_ctx[i]);
+        if (shared_win[i] != NULL) {
+            SDL_DestroyWindow(shared_win[i]);
+            shared_win[i] = NULL;
+        }
     }
     nshared = 0;
     if (gl_ctx != NULL) {
@@ -921,6 +930,7 @@ void grx_video_window_size(int *w, int *h) {
 
 void *grx_video_gl_create_context(void) {
     SDL_GLContext c;
+    SDL_Window *w = NULL;
     if (!gl_up) {
         grx_log("video: no GL context to share (headless)");
         return NULL;
@@ -938,18 +948,36 @@ void *grx_video_gl_create_context(void) {
         return NULL;
     }
     SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+#ifdef _WIN32
     c = SDL_GL_CreateContext(window);
+#else
+    w = SDL_CreateWindow("grx-gl", 64, 64, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+    c = w != NULL ? SDL_GL_CreateContext(w) : NULL;
+#endif
     SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
     if (c == NULL) {
         grx_log("video: no shared GL context: %s", SDL_GetError());
+#ifndef _WIN32
+        if (w != NULL) {
+            SDL_DestroyWindow(w);
+        }
+#endif
         return NULL;
     }
+    shared_win[nshared] = w;
     shared_ctx[nshared++] = c;
     return c;
 }
 
 int grx_video_gl_make_current(void *ctx) {
-    if (window == NULL || !SDL_GL_MakeCurrent(window, (SDL_GLContext)ctx)) {
+    SDL_Window *w = window;
+    int i;
+    for (i = 0; i < nshared; i++) {
+        if (shared_ctx[i] == (SDL_GLContext)ctx && shared_win[i] != NULL) {
+            w = shared_win[i];
+        }
+    }
+    if (window == NULL || !SDL_GL_MakeCurrent(w, (SDL_GLContext)ctx)) {
         grx_log("video: SDL_GL_MakeCurrent: %s", SDL_GetError());
         return -1;
     }
@@ -1079,6 +1107,12 @@ void grx_video_pump(void) {
         return;
     }
     while (SDL_PollEvent(&ev)) {
+        /* Only the game's window: the other GL contexts' hidden windows
+           send their own (a 64x64 size, shown, ...) */
+        if (ev.type >= SDL_EVENT_WINDOW_FIRST && ev.type <= SDL_EVENT_WINDOW_LAST && window != NULL &&
+            ev.window.windowID != SDL_GetWindowID(window)) {
+            continue;
+        }
         switch (ev.type) {
         case SDL_EVENT_QUIT:
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:

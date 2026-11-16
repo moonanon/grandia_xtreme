@@ -40,6 +40,7 @@
 #include <string.h>
 #include "common.h"
 #include "sdk/libmpeg.h"
+#include "grx_hwmem.h"
 #include "grx_movie.h"
 #include "grx_platform.h"
 
@@ -306,14 +307,16 @@ s32 sceMpegCreate(sceMpeg *mp, u32 work, u32 size) {
     s->lastPts = -1;
     s->decodeModeI = s->decodeModeP = s->decodeModeB = -1;
     s->outputCsc = 1;
-    p = calloc(1, sizeof(*p));
+    /* Its address goes into a 32-bit field of the game's struct (frameBuf[0]),
+       so it must be below 2 GB: from the low pool, zero-filled */
+    p = grx_hwmem_alloc_low(sizeof(*p));
     if (p == NULL) {
         return 0;
     }
     p->mp = mp;
     p->dec = grx_mpeg2_create(read_bits, p);
     if (p->dec == NULL) {
-        free(p);
+        grx_hwmem_free_low(p);
         return 0;
     }
     grx_mpeg2_set_picture_hook(p->dec, picture_hook, p);
@@ -327,7 +330,7 @@ s32 sceMpegDelete(sceMpeg *mp) {
 
     if (p != NULL) {
         grx_mpeg2_destroy(p->dec);
-        free(p);
+        grx_hwmem_free_low(p);
         mp->sys->frameBuf[0] = NULL;
     }
     if (cur_mp == mp) {

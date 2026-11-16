@@ -10,8 +10,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#else
+#include "posix_vmem.h"
+#endif
 #include "grx_hwmem.h"
 
 static GrxHwRange ranges[GRX_HW_NRANGES] = {
@@ -596,6 +600,7 @@ void grx_hwmem_free_aliased(void *p) {
 
 /* ---- diagnostics ------------------------------------------------------- */
 
+#ifdef _WIN32
 static LONG CALLBACK fault_report(EXCEPTION_POINTERS *ep) {
     const EXCEPTION_RECORD *er = ep->ExceptionRecord;
     char what[96];
@@ -627,3 +632,36 @@ void grx_hwmem_install_fault_report(void) {
         handle = AddVectoredExceptionHandler(1, fault_report);
     }
 }
+#else
+#include <signal.h>
+#include <ucontext.h>
+
+static void fault_report(int sig, siginfo_t *si, void *uc_) {
+    ucontext_t *uc = uc_;
+    char what[96];
+    uintptr_t pc = (uintptr_t)uc->uc_mcontext.gregs[REG_RIP];
+    uint32_t addr = (uint32_t)(uintptr_t)si->si_addr;
+    struct sigaction dfl;
+
+    hw_log("fault: signal %d at 0x%08X, %s, pc 0x%08lX", sig, addr, grx_hwmem_describe(addr, what, sizeof(what)),
+           (unsigned long)pc);
+    fflush(stderr);
+    memset(&dfl, 0, sizeof(dfl));
+    dfl.sa_handler = SIG_DFL;
+    sigaction(sig, &dfl, NULL);
+}
+
+void grx_hwmem_install_fault_report(void) {
+    static int done;
+    struct sigaction sa;
+
+    if (!done) {
+        done = 1;
+        memset(&sa, 0, sizeof(sa));
+        sa.sa_sigaction = fault_report;
+        sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
+        sigaction(SIGSEGV, &sa, NULL);
+        sigaction(SIGBUS, &sa, NULL);
+    }
+}
+#endif
