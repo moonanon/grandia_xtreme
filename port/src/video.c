@@ -1126,6 +1126,9 @@ void grx_video_pump(void) {
                 (ev.key.key == SDLK_F11 || (ev.key.key == SDLK_RETURN && (ev.key.mod & SDL_KMOD_ALT)))) {
                 toggle_fullscreen();
             }
+            if (!ev.key.repeat && ev.key.key == SDLK_TAB) {
+                grx_turbo_cycle();
+            }
             /* Save states: F1-F4 load slot 1-4, Shift+F1-F4 save there */
             if (!ev.key.repeat && ev.key.key >= SDLK_F1 && ev.key.key <= SDLK_F4) {
                 grx_state_request((int)(ev.key.key - SDLK_F1) + 1, !(ev.key.mod & SDL_KMOD_SHIFT));
@@ -1183,13 +1186,13 @@ static uint64_t field_due(uint64_t n) {
 static void lock_to_display(uint64_t now) {
     static int logged = -1;
     uint64_t want = FIELD_NUM, refresh_num = 0, swap, due, r;
-    int mhz = SDL_GetAtomicInt(&refresh_mhz), k = 0, locked;
+    int mhz = SDL_GetAtomicInt(&refresh_mhz), k = 0, locked, turbo = grx_turbo_speed();
     int64_t ph, err, adj;
 
     SDL_LockMutex(lock);
     swap = last_swap_ns;
     SDL_UnlockMutex(lock);
-    if (gl_up && threaded && !hidden && vsync_mode != 0 && mhz > 0 && swap != 0 &&
+    if (turbo == 1 && gl_up && threaded && !hidden && vsync_mode != 0 && mhz > 0 && swap != 0 &&
         !SDL_GetAtomicInt(&minimized) && !grx_movie_playing()) {
         refresh_num = 1000000000000ull * FIELD_DEN / (uint64_t)mhz;
         k = (int)((FIELD_NUM + refresh_num / 2) / refresh_num);
@@ -1205,6 +1208,9 @@ static void lock_to_display(uint64_t now) {
     }
     locked = want != FIELD_NUM;
     SDL_SetAtomicInt(&lock_k, locked ? k : 0);
+    if (turbo > 1) {
+        want = FIELD_NUM / (uint64_t)turbo;
+    }
     if (want != field_num) {
         base_ns = field_due(fields);
         base_field = fields;

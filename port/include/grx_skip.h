@@ -43,6 +43,14 @@ int grx_skip_fast(void);
    before drawing one, `n` (the game's choice) but during a skip */
 int grx_skip_updates(int n);
 
+/* Fast forward (Tab): cycles the speed 1 -> 2 -> 4 -> 1. The field clock
+   runs that many times faster while the sound device keeps real time, so
+   music and voices play at their own speed. Shown as ">> n". */
+void grx_turbo_cycle(void);
+
+/* The speed now: the one picked, but 1 during a scene skip or a movie */
+int grx_turbo_speed(void);
+
 /* The presenter (GL context current, default framebuffer bound): the
    prompt and the skip's black screen over the picture, which is at
    (x, y, w, h) in a window of ww x wh pixels */

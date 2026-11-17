@@ -101,6 +101,9 @@ static int drew, frames_ran, scene_ran, moved;
 /* For the presenter */
 static SDL_AtomicInt ov_show, ov_kind, ov_button, ov_progress, ov_black;
 
+/* Fast forward (grx_turbo_cycle): the speed picked, 1 2 or 4 */
+static SDL_AtomicInt turbo_pick;
+
 void grx_skip_config(const char *arg) {
     if (arg == NULL || !*arg) {
         arg = getenv("GRX_SCENE_SKIP");
@@ -116,6 +119,10 @@ void grx_skip_config(const char *arg) {
         updates = atoi(getenv("GRX_SKIP_UPDATES"));
     }
     trace = getenv("GRX_SKIP_TRACE") != NULL;
+    if (getenv("GRX_TURBO") != NULL) {
+        int t = atoi(getenv("GRX_TURBO"));
+        SDL_SetAtomicInt(&turbo_pick, t >= 4 ? 4 : t >= 2 ? 2 : 1);
+    }
 }
 
 static int movie_playing(void) {
@@ -301,6 +308,18 @@ int grx_skip_updates(int n) {
     return grx_skip_fast() > 0 ? updates : n;
 }
 
+void grx_turbo_cycle(void) {
+    int t = SDL_GetAtomicInt(&turbo_pick);
+    t = t >= 4 ? 1 : t >= 2 ? 4 : 2;
+    SDL_SetAtomicInt(&turbo_pick, t);
+    grx_log("turbo: x%d", t);
+}
+
+int grx_turbo_speed(void) {
+    int t = SDL_GetAtomicInt(&turbo_pick);
+    return t > 1 && !skipping && !movie_playing() ? t : 1;
+}
+
 /* ---------------------------------------------------------------------- */
 /* The presenter's side */
 
@@ -339,7 +358,9 @@ static int gl_state; /* 0 not set up, 1 ready, -1 failed */
 static GLuint prog, vao, tex;
 static GLint u_rect, u_solid, u_alpha, u_bar;
 static int tex_px = -1, tex_kind = -1, tex_button = -1, tex_w, tex_h, tex_b0, tex_b1;
-static float a_panel, a_black;
+static GLuint ttex;
+static int ttex_px = -1, ttex_kind = -1, ttex_w, ttex_h;
+static float a_panel, a_black, a_turbo;
 static uint64_t last_ns;
 
 static int setup(void) {
@@ -354,12 +375,15 @@ static int setup(void) {
     glUseProgram(prog);
     glUniform1i(glGetUniformLocation(prog, "art"), 0);
     glGenVertexArrays(1, &vao);
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    for (int i = 0; i < 2; i++) {
+        GLuint *t = i == 0 ? &tex : &ttex;
+        glGenTextures(1, t);
+        glBindTexture(GL_TEXTURE_2D, *t);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
     return 0;
 }
 
@@ -382,13 +406,16 @@ void grx_skip_draw_gl(int x, int y, int w, int h, int ww, int wh) {
     uint64_t now = SDL_GetTicksNS();
     float dt = last_ns != 0 ? (float)(now - last_ns) / 1e9f : 0.0f;
     int show = SDL_GetAtomicInt(&ov_show), kind = SDL_GetAtomicInt(&ov_kind);
+    int speed = grx_turbo_speed();
     int px;
 
     last_ns = now;
     dt = dt > 0.1f ? 0.1f : dt;
     a_panel = ease(a_panel, show ? 1.0f : 0.0f, show ? 8.0f : 4.0f, dt);
     a_black = ease(a_black, SDL_GetAtomicInt(&ov_black) ? 1.0f : 0.0f, SDL_GetAtomicInt(&ov_black) ? 5.0f : 2.5f, dt);
-    if ((a_panel <= 0.0f && a_black <= 0.0f) || w <= 0 || h <= 0 || ww <= 0 || wh <= 0 || gl_state < 0) {
+    a_turbo = ease(a_turbo, speed > 1 ? 1.0f : 0.0f, speed > 1 ? 8.0f : 4.0f, dt);
+    if ((a_panel <= 0.0f && a_black <= 0.0f && a_turbo <= 0.0f) || w <= 0 || h <= 0 || ww <= 0 || wh <= 0 ||
+        gl_state < 0) {
         return;
     }
     if (gl_state == 0) {
@@ -436,6 +463,34 @@ void grx_skip_draw_gl(int x, int y, int w, int h, int ww, int wh) {
             glUniform1f(u_alpha, a_panel);
             glUniform4f(u_bar, fill, (float)kind, (float)(now % 1500000000u) / 1.5e9f, 0.0f);
             quad(x1 - (float)tex_w, y0, x1, y0 + (float)tex_h, ww, wh);
+        }
+    }
+    /* Fast forward: ">> n", the "Skipping" panel's look and corner (above
+       the prompt when that shows), the speed kept while it fades out */
+    if (a_turbo > 0.0f) {
+        float m = (float)h * 0.04f, x1 = (float)(x + w) - m;
+        float y0 = (float)y + m + (a_panel > 0.0f && tex_w > 0 ? ((float)tex_h + m * 0.5f) * a_panel : 0.0f);
+        int tk = speed > 1 ? speed : ttex_kind;
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, ttex);
+        glBindSampler(0, 0);
+        if (tk >= 2 && (px != ttex_px || tk != ttex_kind)) {
+            int b0, b1;
+            unsigned char *art = grx_skip_art(px, tk, 0, &ttex_w, &ttex_h, &b0, &b1);
+            if (art != NULL) {
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+                glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, ttex_w, ttex_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, art);
+                free(art);
+                ttex_px = px;
+                ttex_kind = tk;
+            }
+        }
+        if (ttex_kind >= 2) {
+            glUniform1i(u_solid, 0);
+            glUniform1f(u_alpha, a_turbo);
+            glUniform4f(u_bar, 1.0f, 1.0f, (float)(now % 1500000000u) / 1.5e9f, 0.0f);
+            quad(x1 - (float)ttex_w, y0, x1, y0 + (float)ttex_h, ww, wh);
         }
     }
     glBindVertexArray(0);

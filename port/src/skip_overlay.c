@@ -94,6 +94,20 @@ static float glyph(char c) {
         seg(0, 10, 6, 10);
         seg(3, 10, 3, 0);
         return 6.0f;
+    case '>':
+        seg(0, 9, 5, 5);
+        seg(5, 5, 0, 1);
+        return 5.0f;
+    case '2':
+        arc(3, 7.2f, 2.9f, 2.8f, 160, -30);
+        seg(5.51f, 5.8f, 0, 0);
+        seg(0, 0, 6, 0);
+        return 6.0f;
+    case '4':
+        seg(4.5f, 0, 4.5f, 10);
+        seg(4.5f, 10, 0, 3);
+        seg(0, 3, 6.2f, 3);
+        return 6.2f;
     case 'd':
         arc(2.9f, 3.5f, 2.9f, 3.5f, 0, 360);
         seg(5.8f, 0, 5.8f, 10.5f);
@@ -273,7 +287,12 @@ unsigned char *grx_skip_art(int text_px, int kind, int button, int *w, int *h, i
     pen_scale = 1;
     pen_hw = 0.72f;
     x = PAD_X;
-    if (kind == 1) {
+    if (kind >= 2) {
+        /* Fast forward: ">> n", laid out as "Skipping" is */
+        char label[8] = {'>', '>', ' ', (char)('0' + kind % 10), 0};
+        pen_x = x;
+        x += text(label, 1);
+    } else if (kind == 1) {
         pen_x = x;
         x += text("Skipping", 1);
     } else {

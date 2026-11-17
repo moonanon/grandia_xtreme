@@ -316,7 +316,7 @@ int grx_input_captured(void) {
 
 /* The port's own keys are not for the game */
 static int reserved_key(int key) {
-    return key == SDL_SCANCODE_ESCAPE || key == SDL_SCANCODE_F9 || key == SDL_SCANCODE_F10 ||
+    return key == SDL_SCANCODE_ESCAPE || key == SDL_SCANCODE_TAB || key == SDL_SCANCODE_F9 || key == SDL_SCANCODE_F10 ||
            key == SDL_SCANCODE_F11 || (key >= SDL_SCANCODE_F1 && key <= SDL_SCANCODE_F4);
 }
 

@@ -33,6 +33,9 @@ build.
 - The field camera on the right stick: turn it, and tilt it up and down.
 - Skip cut scenes: hold START for 5 seconds.
 - Save states: Shift+F1 to F4 save, F1 to F4 load.
+- Fast forward: Tab cycles 1x, 2x and 4x (shown as ">> 2" / ">> 4");
+  music and voices keep their normal speed. Off during movies and scene
+  skips. `GRX_TURBO=2` or `4` starts at that speed.
 
 ## Building
 
