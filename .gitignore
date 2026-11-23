@@ -46,3 +46,5 @@ port/deps/
 # Texture packs (copyrighted, large): see README
 textures/*
 !textures/README.md
+# build_all.py's launcher, with the disc image's path
+/play.cmd

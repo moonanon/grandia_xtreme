@@ -87,9 +87,9 @@ void grx_unimplemented(const char *name) {
 }
 
 static void usage(void) {
-    printf("Grandia Xtreme port: it can't boot all the way yet (port/README.md).\n"
+    printf("Grandia Xtreme port (port/README.md).\n"
            "\n"
-           "  grandia --boot [options]        boot the game anyway\n"
+           "  grandia --boot [options]        boot the game\n"
            "  grandia --video-test [options]  the frame loop alone: the game's vsync, a test picture\n"
            "  grandia --pad-test [options]    the game's pad code: prints what it reads\n"
            "\n"
@@ -315,8 +315,7 @@ static int grx_main(int argc, char **argv)
         }
     }
     if (mode == NULL) {
-        /* The game can't boot all the way yet (port/README.md, "Status"),
-           so booting it is opt-in */
+        /* Booting is asked for with --boot; with no mode, the usage */
         usage();
         return 0;
     }

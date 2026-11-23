@@ -12,10 +12,13 @@ build/port/gen/ with its inline asm translated to C (asm2c.py) and the few
 constructs clang rejects fixed (FIXUPS), then compiled; `#line` keeps
 errors pointing at the original file.
 
-Needs: clang from llvm-mingw (on PATH, in GRX_CLANG, or the winget
-install), asm/ from tools/split.sh (for the names of the functions still
-in assembly) and build/c_syms*.ld from the matching build (for the names
-the linker defines).
+Needs: clang from llvm-mingw (on PATH, in GRX_CLANG, the winget install
+or port/deps/), SDL3 (port/deps/ or GRX_SDL3), and what the matching
+build gives: the names its linker defines (build/c_syms*.ld), the labels
+still in assembly (asm/, from tools/split.sh) and some constants' bytes
+(its objects). Without the matching build these come from port/inputs/
+(port_inputs.py) and the game's own files in iso/; port/tools/build_all.py
+sets all of it up.
 """
 
 import argparse
@@ -206,9 +209,11 @@ def find_clang():
         return c
     pkgs = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WinGet\Packages")
     found = glob.glob(os.path.join(pkgs, "MartinStorsjo.LLVM-MinGW*", "llvm-mingw*", "bin", f"{TARGET}-clang.exe"))
+    # build_all.py unpacks a release there
+    found += sorted(glob.glob(os.path.join(ROOT, "port", "deps", "llvm-mingw-*", "bin", f"{TARGET}-clang.exe")))
     if found:
         return found[0]
-    sys.exit(f"clang for {TARGET} not found: install llvm-mingw "
+    sys.exit(f"clang for {TARGET} not found: run build.cmd, install llvm-mingw "
              "(winget install MartinStorsjo.LLVM-MinGW.UCRT) or set GRX_CLANG")
 
 
@@ -894,6 +899,9 @@ def main():
         else:
             link_cmd = None
         p = subprocess.run(link_cmd or [clang, "-target", TARGET, "-o", exe, "@" + rsp, "-g",
+            # Quoted: a path may have spaces in it
+            f.write("\n".join('"' + o.replace("\\", "/") + '"' for o in objs + [stub_obj, marks[1]]))
+        p = subprocess.run([clang, "-target", TARGET, "-o", exe, "@" + rsp, "-g",
                             "-Wl,--error-limit=0", "-Wl,-Map," + os.path.join(OUT, "grandia.map"),
                             # No ASLR: addresses in crash reports match the
                             # map, and the layout stays the same from run to run

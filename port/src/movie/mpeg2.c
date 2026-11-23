@@ -7,7 +7,8 @@
  * (the IPU's CSC command).
  *
  * Written from ISO/IEC 13818-2. The IDCT is the integer Chen-Wang one
- * that mpeg2decode uses (IEEE 1180 accurate).
+ * that mpeg2decode uses (IEEE 1180 accurate), under MSSG's notice
+ * (THIRD_PARTY.md).
  *
  * Plain C, no OS calls, no game names.
  */

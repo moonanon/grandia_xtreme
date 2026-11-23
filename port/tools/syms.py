@@ -9,12 +9,16 @@
    counterpart in clang's output; its bytes are copied from the matching
    build's object into linker_data.c. Fixed hardware addresses get buffers
    there too, until the platform layer gives them a meaning.
+   Without the matching build (or with GRX_PORT_INPUTS=1) the names come
+   from port/inputs/ and the bytes from the game's own files in iso/
+   (port/tools/port_inputs.py).
 2. What is still undefined when linking: functions still in assembly,
    kernel calls, data only asm defines. stubs.c gets a function that stops
    the game with its name, or a zeroed buffer of the asm object's size.
 """
 
 import glob
+import json
 import os
 import re
 import struct
@@ -30,13 +34,29 @@ PREFIX = "_"
 MOVED = {}
 
 
+def from_inputs():
+    """GRX_PORT_INPUTS=1: take what the matching build gives from
+    port/inputs/ even where build/ has it (to check them)"""
+    return os.environ.get("GRX_PORT_INPUTS", "") not in ("", "0")
+
+
+def inputs_dir(root):
+    return os.path.join(root, "port", "inputs")
+
+
 class LinkerNames:
-    def __init__(self, root):
+    def __init__(self, root, inputs=None):
+        """The matching build's c_syms*.ld from build/, or else (or with
+        inputs=True) their copies in port/inputs/ (port_inputs.py)"""
         self.root = root
-        files = sorted(glob.glob(os.path.join(root, "build", "c_syms*.ld")))
+        files = []
+        if not inputs and not (inputs is None and from_inputs()):
+            files = sorted(glob.glob(os.path.join(root, "build", "c_syms*.ld")))
+        if not files and inputs is not False:
+            files = sorted(glob.glob(os.path.join(inputs_dir(root), "c_syms*.ld")))
         if not files:
-            raise SystemExit("build/c_syms*.ld not found: run the matching build first "
-                             "(tools/docker.sh make)")
+            raise SystemExit("c_syms*.ld not found in build/ or port/inputs/: run the matching build "
+                             "first (tools/docker.sh make)")
         self.rel = {}    # name -> (base, offset)
         self.fixed = {}  # name -> address
         for path in files:
@@ -155,19 +175,65 @@ _RODATA_CACHE = {}
 
 def _rodata(root, base):
     """(bytes, [(symbol, offset, size)]) of the .rodata that a
-    __rodata_<binary>_<file> marker starts, from the matching build's
-    object; None if base isn't such a marker"""
+    __rodata_<binary>_<file> marker starts: from the matching build's
+    object, or else from port/inputs/rodata.json and the game's own file in
+    iso/; None if base isn't such a marker"""
     m = re.fullmatch(r"__rodata_(main|field|battle|viewer)_(\w+)", base)
     if not m:
         return None
-    if base in _RODATA_CACHE:
-        return _RODATA_CACHE[base]
-    binary, file = m.groups()
+    if base not in _RODATA_CACHE:
+        found = None if from_inputs() else rodata_from_object(root, base, missing_ok=True)
+        _RODATA_CACHE[base] = found or rodata_from_inputs(root, base)
+    return _RODATA_CACHE[base]
+
+
+_INPUT_RODATA = {}
+
+
+def rodata_from_inputs(root, base):
+    if not _INPUT_RODATA:
+        path = os.path.join(inputs_dir(root), "rodata.json")
+        if not os.path.exists(path):
+            raise SystemExit(f"no matching-build object for {base}, and no port/inputs/rodata.json")
+        with open(path, encoding="utf-8") as f:
+            _INPUT_RODATA.update(json.load(f))
+    e = _INPUT_RODATA.get(base)
+    if e is None:
+        raise SystemExit(f"{base} isn't in port/inputs/rodata.json (port/tools/port_inputs.py)")
+    game_file = os.path.join(root, "iso", e["file"])
+    try:
+        with open(game_file, "rb") as f:
+            f.seek(e["offset"])
+            data = f.read(e["size"])
+    except OSError:
+        raise SystemExit(f"iso/{e['file']} not found: the port takes some of the game's constants "
+                         "from it (README.md, Building)")
+    if len(data) != e["size"]:
+        raise SystemExit(f"iso/{e['file']} is too short: is it the US disc's?")
+    # The words the linker relocates hold their addends, as in the object
+    data = bytearray(data)
+    for off, word in e.get("addends", {}).items():
+        data[int(off):int(off) + 4] = bytes.fromhex(word)
+    return bytes(data), [tuple(o) for o in e["objects"]]
+
+
+def rodata_object(root, base):
+    """The matching build's object whose .rodata a marker starts, or None"""
+    binary, file = re.fullmatch(r"__rodata_(main|field|battle|viewer)_(\w+)", base).groups()
     # The Makefile names the marker after the path with / as _
     cands = [file, re.sub(r"^data_", "data/", file)]
-    path = next((p for p in (os.path.join(root, "build", "src", binary, c + ".o") for c in cands)
+    return next((p for p in (os.path.join(root, "build", "src", binary, c + ".o") for c in cands)
                  if os.path.exists(p)), None)
+
+
+def rodata_from_object(root, base, missing_ok=False):
+    """(bytes, [(symbol, offset, size)]) of a marker's .rodata from the
+    matching build's object (port_inputs.py records where they are). The
+    bytes are the object's: words the linker relocates hold their addends"""
+    path = rodata_object(root, base)
     if path is None:
+        if missing_ok:
+            return None
         raise SystemExit(f"no matching-build object for {base} (run the matching build)")
     with open(path, "rb") as f:
         elf = f.read()
@@ -193,8 +259,7 @@ def _rodata(root, base):
                 n = elf[sec[s[6]][4] + st_name:].split(b"\0", 1)[0].decode()
                 if not n.startswith((".", "__rodata_")):
                     syms.append((n, st_value, st_size))
-    _RODATA_CACHE[base] = (data, syms)
-    return _RODATA_CACHE[base]
+    return data, syms
 
 
 # --- stubs ---------------------------------------------------------------------
@@ -239,8 +304,18 @@ def asm_labels(root):
     return out
 
 
+def stub_labels(root):
+    """asm_labels from asm/, or else port/inputs/asm_labels.json"""
+    labels = {} if from_inputs() else asm_labels(root)
+    path = os.path.join(inputs_dir(root), "asm_labels.json")
+    if not labels and os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            labels = {k: tuple(v) for k, v in json.load(f).items()}
+    return labels
+
+
 def write_stubs(path, undefined, root):
-    labels = asm_labels(root) if undefined else {}
+    labels = stub_labels(root) if undefined else {}
     funcs, data = [], []
     for raw in sorted(undefined):
         name = raw

@@ -13,8 +13,9 @@
 
 Pad bits (include/pad.h): 0x0001 L2, 0x0040 cross, 0x0100 select.
 
-The Configurations page has two rows of the port's, Controller and
-Keyboard, for the controls' mapping (grx_input.h):
+The Configurations page has three rows of the port's: Controller and
+Keyboard, for the controls' mapping (grx_input.h), and Display, for the
+video settings (grx_video_opts.h).
 port/game/field/62B3F8.c is FldMenuOptionsUpdate with them, and
 FldMenuOptionsInit's window is three rows (0x48) taller, downwards. Its
 lists show PlayStation button icons, drawn after the menu's windows

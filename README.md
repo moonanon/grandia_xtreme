@@ -46,12 +46,72 @@ build.
 
 ## Building
 
-The port builds on Windows. The decompilation's build, which the port
-needs once, runs in Docker from a Linux or macOS shell: on Windows, WSL.
+The port builds on Windows 10 or 11. There are two ways: `build.cmd`,
+which needs only Python, and the step-by-step build with the
+decompilation's own build, for working on the decompilation.
 
-### What you need
+### With build.cmd
 
-- Windows 10 or 11, with [Python 3](https://www.python.org/downloads/).
+You need [Python 3](https://www.python.org/downloads/) and your copy of
+the game as a disc image. Double-click `build.cmd` in the repository's
+folder, or run it in PowerShell or Command Prompt:
+
+```powershell
+.\build.cmd --disc "D:\Games\Grandia Xtreme.iso"
+```
+
+It does four things:
+
+1. **The game's code files.** It copies `SLUS_204.17`, `FIELD.BIN`,
+   `BATTLE.BIN` and `VIEWER.BIN` out of the image into `iso\` and checks
+   each against the US release's SHA-1 (the table below). The image is
+   the one given with `--disc`, else `GRX_DISC`, else the only image in
+   `disc\`; otherwise it asks for it (you can drag the file onto the
+   window). It reads `.iso` images and `.mds` ones with their `.mdf`,
+   with plain or raw CD sectors. Nothing is written to `iso\` unless all
+   four files check out.
+2. **The tools.** It looks for [llvm-mingw](https://github.com/mstorsjo/llvm-mingw)
+   (the clang compiler: `GRX_CLANG`, `PATH`, a winget install, or
+   `port\deps\`) and [SDL3](https://github.com/libsdl-org/SDL) (`GRX_SDL3`
+   or `port\deps\`). Each one that is missing it offers to download from
+   GitHub: llvm-mingw 20261020 (about 190 MB) and SDL3 3.4.18 (about
+   5 MB), each checked against its SHA-256 and unpacked into
+   `port\deps\`. Nothing is installed; deleting `port\deps\` removes them.
+3. **The build.** It runs `port\tools\build.py`: the 64-bit
+   `build\port64\grandia.exe` by default, `--32` for the 32-bit
+   `build\port\grandia.exe`, `--both` for both. The first build compiles
+   about 4,600 files and takes a while (about 10 to 20 minutes); later
+   ones compile only what changed.
+4. **play.cmd.** It writes `play.cmd` in the repository's folder, which
+   starts the game with your image (see Running). A later run without a
+   disc keeps the one `play.cmd` already has.
+
+Run `build.cmd` again after pulling changes. `--yes` answers its
+questions with yes, for scripts.
+
+Nothing of the game's is in the repository: what the build needs from the
+game, it takes from your image. What it would otherwise need from the
+decompilation's build (names, addresses and sizes only) is kept in
+`port/inputs/`.
+
+If it stops, it says why. The usual reasons:
+
+- *isn't the US release's*: the port is made from Grandia Xtreme (USA),
+  `SLUS-20417`; other releases' files differ.
+- *not an ISO 9660 image*, or *its .mdf isn't next to it*: give the
+  `.iso`, or the `.mds` with its `.mdf` beside it.
+- *couldn't download*: check the connection and run it again.
+
+### Step by step, with the decompilation's build
+
+This is the way to build when you work on the decompilation itself, and
+what `build.cmd` does by hand. The decompilation's build runs in Docker
+from a Linux or macOS shell: on Windows, WSL. When its output (`build/`,
+`asm/`) is there, the port's build uses it instead of `port/inputs/`.
+
+#### What you need
+
+- [Python 3](https://www.python.org/downloads/).
 - [WSL](https://learn.microsoft.com/windows/wsl/install) (Ubuntu) with
   `python3`, `python3-venv` and `curl`, and
   [Docker Desktop](https://www.docker.com/products/docker-desktop/) with its
@@ -70,11 +130,12 @@ needs once, runs in Docker from a Linux or macOS shell: on Windows, WSL.
 - Your copy of the game, as a disc image (`.iso`, or `.mds` with its
   `.mdf`).
 
-### 1. The game's code files
+#### 1. The game's code files
 
 Copy these four files from the root of your disc (next to `SYSTEM.CNF`)
 into `iso/`. Any tool that reads ISO 9660 images can take them out of an
-image, or mount the image in Windows.
+image, or mount the image in Windows. (`build.cmd` does this step on its
+own.)
 
 | File | Size | SHA-1 |
 | --- | ---: | --- |
@@ -83,14 +144,12 @@ image, or mount the image in Windows.
 | `iso/BATTLE.BIN` | 496,464 | `bff65a26ebbe7adab74340a4fcb08f3cb196c65a` |
 | `iso/VIEWER.BIN` | 57,156 | `ac36fdc130674229a2a27665cbcfc46e40713e98` |
 
-`iso/`, `disc/`, disc images and everything the build makes are in
-`.gitignore`.
+`iso/`, `disc/`, disc images, `port/deps/`, `play.cmd` and everything the
+build makes are in `.gitignore`.
 
-### 2. The decompilation's build
+#### 2. The decompilation's build
 
-The port needs it once: it reads the assembly for the functions not yet in
-C and the addresses the matching build's linker gives. In WSL, in the
-repository's folder (`/mnt/c/...`):
+In WSL, in the repository's folder (`/mnt/c/...`):
 
 ```sh
 python3 -m venv .venv
@@ -114,7 +173,11 @@ tools/docker.sh make -j8
   OK       build/viewer.bin
   ```
 
-### 3. The port
+After a change to `src/` that renames or moves anything, run
+`python port/tools/port_inputs.py` (in Windows) to bring `port/inputs/`
+up to date for `build.cmd`; `--check` says whether it is.
+
+#### 3. The port
 
 In a Windows terminal (PowerShell or Command Prompt), in the repository's
 folder:
@@ -131,18 +194,27 @@ compile only what changed. Each copies `SDL3.dll` next to its
 ## Running
 
 The port reads everything but the code (pictures, sound, movies, maps)
-from your disc image while it runs. Put the image somewhere (`disc/` is a
-good place: it's ignored), then, in PowerShell or Command Prompt:
+from your disc image while it runs. After `build.cmd`, double-click
+`play.cmd`, or run it with options:
+
+```powershell
+.\play.cmd --fullscreen
+```
+
+Or start `grandia.exe` yourself, in PowerShell or Command Prompt:
 
 ```powershell
 .\build\port64\grandia.exe --boot --disc "disc\Grandia Xtreme.ISO"
 ```
 
-`--boot` is needed for now. Instead of `--disc`, you can set the
-`GRX_DISC` environment variable to the image's path.
+`--boot` starts the game (without it, `grandia.exe` lists its options).
+Instead of `--disc`, you can set the `GRX_DISC` environment variable to the
+image's path. `disc\` is a good place for the image: it's ignored.
 
 **Memory cards** are folders: `%APPDATA%\grandia_extreme\memcard\card1\`
-(slot 1) and `card2\`. Set `GRX_MC_DIR` to keep them somewhere else.
+(slot 1) and `card2\` (slot 2, empty unless `GRX_MC2` is `formatted`),
+the same for both builds and wherever `grandia.exe` is. Set `GRX_MC_DIR`
+to keep them somewhere else.
 
 **Settings** for the controls and the display (resolution, frame rate,
 aspect ratio) are saved in `grandia.ini` next to `grandia.exe`. Change them
@@ -293,7 +365,9 @@ files are not included (`textures/` is git-ignored).
 | `config/` | splat configs, symbol names, the memory map |
 | `src/`, `include/` | the decompiled C and its headers |
 | `tools/` | the decompilation's build and checking scripts |
+| `build.cmd`, `port/tools/build_all.py` | the port's build in one step, from your disc image |
 | `port/tools/build.py` | the port's build |
+| `port/inputs/` | what the port's build takes from the decompilation's build, so it builds without it |
 | `port/tools/fixups/` | changes the port makes to the game's C as it builds it (the game's sources aren't edited) |
 | `port/game/` | C for functions the decompilation still has only in assembly |
 | `port/src/` | the platform layer: kernel, GS and its OpenGL renderer, VU, sound, movies, memory cards, input |
@@ -308,4 +382,6 @@ fdlibm maths) and Sony's PS2 SDK libraries. Each C file holding library
 code says which library at its top. Where a library is open source, the
 matching C follows the upstream source and falls under that library's
 license. [THIRD_PARTY.md](THIRD_PARTY.md) lists the files and quotes the
-notices. SDL3, which the port uses, is under the zlib license.
+notices. It also covers the port: its MPEG-2 decoder's IDCT, which comes
+from MSSG `mpeg2decode`, and the libraries `build.cmd` downloads, SDL3
+(zlib license) and llvm-mingw.

@@ -1,0 +1,3002 @@
+{
+"AddDmacHandler": [
+"func",
+0
+],
+"AddDmacHandler2": [
+"func",
+0
+],
+"AddIntcHandler": [
+"func",
+0
+],
+"AddIntcHandler2": [
+"func",
+0
+],
+"AddSbusIntcHandler": [
+"func",
+0
+],
+"AmapBuildCollision": [
+"func",
+0
+],
+"AmapGimmickBoxGet": [
+"func",
+0
+],
+"AmapLoad": [
+"func",
+0
+],
+"AmapTemplateListsBuild": [
+"func",
+0
+],
+"AmapTilesFixWallGimmicks": [
+"func",
+0
+],
+"BtlChrAttachToPart": [
+"func",
+0
+],
+"BtlChrGetHeight": [
+"func",
+0
+],
+"BtlChrPartDirToWorld": [
+"func",
+0
+],
+"BtlCmdListOpen": [
+"func",
+0
+],
+"BtlDirFromPitchYaw": [
+"func",
+0
+],
+"BtlVecRandomDir": [
+"func",
+0
+],
+"CamCalcMatrix": [
+"func",
+0
+],
+"CamCalcRoll": [
+"func",
+0
+],
+"CamCalcUp": [
+"func",
+0
+],
+"CamFollowClearChase": [
+"func",
+0
+],
+"CamFollowTrailMove": [
+"func",
+0
+],
+"CamPresetChaseMove": [
+"func",
+0
+],
+"CamRayTest": [
+"func",
+0
+],
+"CamStateCalcEye": [
+"func",
+0
+],
+"CancelWakeupThread": [
+"func",
+0
+],
+"ChangeThreadPriority": [
+"func",
+0
+],
+"Chroma_Height": [
+"data",
+4
+],
+"Chroma_Width": [
+"data",
+4
+],
+"ClearEventFlag": [
+"func",
+0
+],
+"Coded_Picture_Height": [
+"data",
+4
+],
+"Coded_Picture_Width": [
+"data",
+4
+],
+"CpuConfig": [
+"func",
+0
+],
+"CreateEventFlag": [
+"func",
+0
+],
+"CreateSema": [
+"func",
+0
+],
+"CreateThread": [
+"func",
+0
+],
+"DIntr": [
+"func",
+0
+],
+"D_004758C0": [
+"data",
+24
+],
+"D_004A2154": [
+"data",
+12
+],
+"D_004A22D4": [
+"data",
+12
+],
+"D_004A24DC": [
+"data",
+4
+],
+"D_004A250C": [
+"data",
+4
+],
+"D_004A32C4": [
+"data",
+12
+],
+"D_004A32E4": [
+"data",
+12
+],
+"D_004A3314": [
+"data",
+12
+],
+"D_004A683C": [
+"data",
+4
+],
+"D_004A6E28": [
+"data",
+8
+],
+"D_004A6FFC": [
+"data",
+4
+],
+"D_004A7304": [
+"data",
+4
+],
+"D_004A8B9C": [
+"data",
+4
+],
+"D_004A8F54": [
+"data",
+12
+],
+"D_004A8FC4": [
+"data",
+4
+],
+"D_00670C2C": [
+"data",
+4
+],
+"D_00670D04": [
+"data",
+12
+],
+"D_00670DEC": [
+"data",
+4
+],
+"D_00670EC4": [
+"data",
+12
+],
+"D_00670F04": [
+"data",
+12
+],
+"D_00670F44": [
+"data",
+12
+],
+"D_006710AC": [
+"data",
+4
+],
+"D_0067120C": [
+"data",
+4
+],
+"D_00671244": [
+"data",
+12
+],
+"D_00671434": [
+"data",
+12
+],
+"D_0067150C": [
+"data",
+4
+],
+"D_00673574": [
+"data",
+4
+],
+"D_00673E24": [
+"data",
+12
+],
+"D_0067406C": [
+"data",
+4
+],
+"D_00674E84": [
+"data",
+4
+],
+"D_00674F44": [
+"data",
+12
+],
+"D_00674F8C": [
+"data",
+4
+],
+"D_0067546C": [
+"data",
+4
+],
+"D_00675704": [
+"data",
+12
+],
+"D_00675774": [
+"data",
+4
+],
+"D_00675824": [
+"data",
+4
+],
+"D_00675894": [
+"data",
+12
+],
+"D_00675F84": [
+"data",
+12
+],
+"D_006761EC": [
+"data",
+4
+],
+"D_00676264": [
+"data",
+4
+],
+"D_00676294": [
+"data",
+4
+],
+"D_006E0AD4": [
+"data",
+12
+],
+"D_006E0AF4": [
+"data",
+12
+],
+"D_006E0DB4": [
+"data",
+12
+],
+"D_006E13EC": [
+"data",
+4
+],
+"D_006E1D3C": [
+"data",
+4
+],
+"D_006E1E44": [
+"data",
+12
+],
+"D_006E23E4": [
+"data",
+12
+],
+"D_006E2404": [
+"data",
+12
+],
+"D_006E2464": [
+"data",
+12
+],
+"D_00700000": [
+"data",
+128
+],
+"Deci2Call": [
+"func",
+0
+],
+"DeleteEventFlag": [
+"func",
+0
+],
+"DeleteSema": [
+"func",
+0
+],
+"DeleteThread": [
+"func",
+0
+],
+"DisableCache": [
+"func",
+0
+],
+"DisableDispatchThread": [
+"func",
+0
+],
+"DisableDmac": [
+"func",
+0
+],
+"DisableDmacHandler": [
+"func",
+0
+],
+"DisableIntc": [
+"func",
+0
+],
+"DisableIntcHandler": [
+"func",
+0
+],
+"EIntr": [
+"func",
+0
+],
+"EffSpawnByCode": [
+"func",
+0
+],
+"EnableCache": [
+"func",
+0
+],
+"EnableDispatchThread": [
+"func",
+0
+],
+"EnableDmac": [
+"func",
+0
+],
+"EnableDmacHandler": [
+"func",
+0
+],
+"EnableIntc": [
+"func",
+0
+],
+"EnableIntcHandler": [
+"func",
+0
+],
+"EndOfHeap": [
+"func",
+0
+],
+"EnvFlareCalcPos": [
+"func",
+0
+],
+"EvtAreaCalcMatrix": [
+"func",
+0
+],
+"EvtAreaDebugDraw": [
+"func",
+0
+],
+"EvtAreaHitBoundSphere": [
+"func",
+0
+],
+"EvtAreaHitBox": [
+"func",
+0
+],
+"EvtScnrWorkLayout": [
+"func",
+0
+],
+"ExecOSD": [
+"func",
+0
+],
+"ExecPS2": [
+"func",
+0
+],
+"Exit": [
+"func",
+0
+],
+"ExitDeleteThread": [
+"func",
+0
+],
+"ExitThread": [
+"func",
+0
+],
+"Fault_Flag": [
+"data",
+4
+],
+"FldCollShapeTest": [
+"func",
+0
+],
+"FldCollSphereEdgeTest": [
+"func",
+0
+],
+"FldCollTriBuild": [
+"func",
+0
+],
+"FldFlagListUpdate": [
+"func",
+0
+],
+"FldMemAlloc": [
+"func",
+0
+],
+"FldMenuItemUpdate": [
+"func",
+0
+],
+"FldMenuJunctionRecipeCellBuild": [
+"func",
+0
+],
+"FldMenuJunctionUpdate": [
+"func",
+0
+],
+"FldMenuMagicUpdate": [
+"func",
+0
+],
+"FldMenuPartyPanelOpen": [
+"func",
+0
+],
+"FldMenuSaveSlotListBuild": [
+"func",
+0
+],
+"FldMenuWinTextAdd": [
+"func",
+0
+],
+"FldThreatGaugeDraw": [
+"func",
+0
+],
+"FldTreasureSpawnDrops": [
+"func",
+0
+],
+"FlushCache": [
+"func",
+0
+],
+"FxHomingUpdate": [
+"func",
+0
+],
+"FxTraceStripDraw": [
+"func",
+0
+],
+"GetCop0": [
+"func",
+0
+],
+"GetEntryAddress": [
+"func",
+0
+],
+"GetGsHParam": [
+"func",
+0
+],
+"GetGsVParam": [
+"func",
+0
+],
+"GetMemorySize": [
+"func",
+0
+],
+"GetOsdConfigParam": [
+"func",
+0
+],
+"GetOsdConfigParam2": [
+"func",
+0
+],
+"GetThreadId": [
+"func",
+0
+],
+"GphClipTriDraw": [
+"func",
+0
+],
+"GphClipTriGather": [
+"func",
+0
+],
+"GphClipVertProject": [
+"func",
+0
+],
+"GphFbRippleDraw": [
+"func",
+0
+],
+"GphGaObjDeformCollapse": [
+"func",
+0
+],
+"GphGaObjDeformNearPoint": [
+"func",
+0
+],
+"GphGaObjDeformPulse": [
+"func",
+0
+],
+"GphGaObjDeformRipple": [
+"func",
+0
+],
+"GphGaObjDeformWaveLit": [
+"func",
+0
+],
+"GphGaObjEnvMapCalcUv": [
+"func",
+0
+],
+"GphMatrixDirPos": [
+"func",
+0
+],
+"GphMeshClipTest": [
+"func",
+0
+],
+"GphMeshDrawClip": [
+"func",
+0
+],
+"GphMeshDrawNoClip": [
+"func",
+0
+],
+"GphMeshDrawVu0": [
+"func",
+0
+],
+"GphMeshPacketLit": [
+"func",
+0
+],
+"GphMeshPacketLitVu1": [
+"func",
+0
+],
+"GphMeshPacketUnlit": [
+"func",
+0
+],
+"GphMeshPacketUnlitVu1": [
+"func",
+0
+],
+"GphModelCalcPartsMotion": [
+"func",
+0
+],
+"GphModelCalcPartsMotionBlend": [
+"func",
+0
+],
+"GphModelCalcPartsMotionEx": [
+"func",
+0
+],
+"GphModelCalcPartsMotionOverride": [
+"func",
+0
+],
+"GphModelCalcPartsMotionSplit": [
+"func",
+0
+],
+"GphModelCalcViewMatrices": [
+"func",
+0
+],
+"GphModelDrawCopyParts": [
+"func",
+0
+],
+"GphModelDrawParts": [
+"func",
+0
+],
+"GphModelDrawPartsCulled": [
+"func",
+0
+],
+"GphModelDrawSimpleParts": [
+"func",
+0
+],
+"GphModelMorph": [
+"func",
+0
+],
+"GphModelUpdateGsRegs": [
+"func",
+0
+],
+"GphMorphNormalsLerp": [
+"func",
+0
+],
+"GphMotKeyLerpQuat": [
+"func",
+0
+],
+"GphMotKeyLerpRot": [
+"func",
+0
+],
+"GphMotKeyLerpVec": [
+"func",
+0
+],
+"GphMotQuatSlerp": [
+"func",
+0
+],
+"GphNearClipTris": [
+"func",
+0
+],
+"GphPoly3DDraw": [
+"func",
+0
+],
+"GphProjTexCalcMtx": [
+"func",
+0
+],
+"GphProjTexCastModel": [
+"func",
+0
+],
+"GphProjTexSphereTest": [
+"func",
+0
+],
+"GphQuad3DSetCorners": [
+"func",
+0
+],
+"GphRippleApply8": [
+"func",
+0
+],
+"GphShadowCalcMtx": [
+"func",
+0
+],
+"GphSkinPackNormals": [
+"func",
+0
+],
+"GphSphereDraw": [
+"func",
+0
+],
+"GphTexVertsProject": [
+"func",
+0
+],
+"GphTriCull": [
+"func",
+0
+],
+"GphTriCullClip": [
+"func",
+0
+],
+"GphTriCullClipNear": [
+"func",
+0
+],
+"GphVertCompact": [
+"func",
+0
+],
+"GphVertIndex": [
+"func",
+0
+],
+"GphVertXform": [
+"func",
+0
+],
+"GphVertXformBillboard": [
+"func",
+0
+],
+"GphVertXformClip": [
+"func",
+0
+],
+"GphVertXformClipBillboard": [
+"func",
+0
+],
+"GphVertexPackXyz": [
+"func",
+0
+],
+"GsGetIMR": [
+"func",
+0
+],
+"GsGifWaitIdle": [
+"func",
+0
+],
+"GsMfifoSend": [
+"func",
+0
+],
+"GsPutIMR": [
+"func",
+0
+],
+"GsTexPacketSet": [
+"func",
+0
+],
+"GsVblankHandler": [
+"func",
+0
+],
+"GsVif1DmaSend": [
+"func",
+0
+],
+"GsVif1DmaSendChain": [
+"func",
+0
+],
+"GsVif1DmaWait": [
+"func",
+0
+],
+"Interrupt2Iop": [
+"func",
+0
+],
+"InvalidDCache": [
+"func",
+0
+],
+"ItemCanAdd": [
+"func",
+0
+],
+"ItemCharSlotListBuild": [
+"func",
+0
+],
+"ItemEggSpellRecFill": [
+"func",
+0
+],
+"ItemInvCompareListBuild": [
+"func",
+0
+],
+"ItemSkillItemListBuild": [
+"func",
+0
+],
+"JoinThread": [
+"func",
+0
+],
+"KSeg0": [
+"func",
+0
+],
+"LoadExecPS2": [
+"func",
+0
+],
+"MPEG2_Flag": [
+"data",
+4
+],
+"MachineType": [
+"func",
+0
+],
+"MapBorderSweepCircle": [
+"func",
+0
+],
+"MapHtaHitCapsule": [
+"func",
+0
+],
+"MapPolySweepTest": [
+"func",
+0
+],
+"MemMove128": [
+"func",
+0
+],
+"MemMove32": [
+"func",
+0
+],
+"MemMove64": [
+"func",
+0
+],
+"MemSet": [
+"func",
+0
+],
+"MenuTacticsInit": [
+"func",
+0
+],
+"MiniConcertComboMarksUpdate": [
+"func",
+0
+],
+"MiniConcertStageSetupInit": [
+"func",
+0
+],
+"PSMode": [
+"func",
+0
+],
+"PollEventFlag": [
+"func",
+0
+],
+"PollSema": [
+"func",
+0
+],
+"PtclEmitterScatterPoints": [
+"func",
+0
+],
+"PtyMoveLevelsUpdate": [
+"func",
+0
+],
+"RFU000": [
+"func",
+0
+],
+"RFU003": [
+"func",
+0
+],
+"RFU005": [
+"func",
+0
+],
+"RFU008": [
+"func",
+0
+],
+"RFU009": [
+"func",
+0
+],
+"RFU060": [
+"func",
+0
+],
+"RFU061": [
+"func",
+0
+],
+"RFU063": [
+"func",
+0
+],
+"RFU073": [
+"func",
+0
+],
+"ReferEventFlagStatus": [
+"func",
+0
+],
+"ReferSemaStatus": [
+"func",
+0
+],
+"ReferThreadStatus": [
+"func",
+0
+],
+"ReleaseAlarm": [
+"func",
+0
+],
+"ReleaseWaitThread": [
+"func",
+0
+],
+"RemoveDmacHandler": [
+"func",
+0
+],
+"RemoveIntcHandler": [
+"func",
+0
+],
+"RemoveSbusIntcHandler": [
+"func",
+0
+],
+"ResetEE": [
+"func",
+0
+],
+"ResumeThread": [
+"func",
+0
+],
+"RotateThreadReadyQueue": [
+"func",
+0
+],
+"Second_Field": [
+"data",
+4
+],
+"SetAlarm": [
+"func",
+0
+],
+"SetCPUTimer": [
+"func",
+0
+],
+"SetCPUTimerHandler": [
+"func",
+0
+],
+"SetEventFlag": [
+"func",
+0
+],
+"SetGsCrt": [
+"func",
+0
+],
+"SetGsHParam": [
+"func",
+0
+],
+"SetGsVParam": [
+"func",
+0
+],
+"SetOsdConfigParam": [
+"func",
+0
+],
+"SetOsdConfigParam2": [
+"func",
+0
+],
+"SetPgifHandler": [
+"func",
+0
+],
+"SetSyscall": [
+"func",
+0
+],
+"SetVCommonHandler": [
+"func",
+0
+],
+"SetVInterruptHandler": [
+"func",
+0
+],
+"SetVSyncFlag": [
+"func",
+0
+],
+"SetVTLBRefillHandler": [
+"func",
+0
+],
+"SignalSema": [
+"func",
+0
+],
+"SleepThread": [
+"func",
+0
+],
+"SndEqFilterEnergy": [
+"func",
+0
+],
+"SndFloatToInt": [
+"func",
+0
+],
+"SndFsReadDir": [
+"func",
+0
+],
+"SndSoftMixPack16": [
+"func",
+0
+],
+"SndSoftVu0Gather4": [
+"func",
+0
+],
+"SndSoftVu0IsBusy": [
+"func",
+0
+],
+"SndSoftVu0Load": [
+"func",
+0
+],
+"SndSoftVu0Run": [
+"func",
+0
+],
+"SndSoftVu0Save": [
+"func",
+0
+],
+"SndSoftVu0SetGains": [
+"func",
+0
+],
+"StartThread": [
+"func",
+0
+],
+"SuspendThread": [
+"func",
+0
+],
+"SyncDCache": [
+"func",
+0
+],
+"Temporal_Reference_Base": [
+"data",
+4
+],
+"Temporal_Reference_GOP_Reset": [
+"data",
+8
+],
+"TerminateThread": [
+"func",
+0
+],
+"True_Framenum": [
+"data",
+4
+],
+"True_Framenum_max": [
+"data",
+4
+],
+"UtilSortU64": [
+"func",
+0
+],
+"VuBezier3": [
+"func",
+0
+],
+"VuBezierInterp": [
+"func",
+0
+],
+"VuBoxContainsOrigin": [
+"func",
+0
+],
+"VuCapsuleTriHit": [
+"func",
+0
+],
+"VuCardinalInterp": [
+"func",
+0
+],
+"VuCardinalInterp2": [
+"func",
+0
+],
+"VuCatmullRomInterp": [
+"func",
+0
+],
+"VuCopy128": [
+"func",
+0
+],
+"VuDirFromAngles": [
+"func",
+0
+],
+"VuDistSqCompare": [
+"func",
+0
+],
+"VuDot4": [
+"func",
+0
+],
+"VuFloatToInt": [
+"func",
+0
+],
+"VuIntToFloat": [
+"func",
+0
+],
+"VuLightLoad4": [
+"func",
+0
+],
+"VuLightSelectNearest4": [
+"func",
+0
+],
+"VuLightTransform": [
+"func",
+0
+],
+"VuMeshProjectTex": [
+"func",
+0
+],
+"VuMeshProjectTexCull": [
+"func",
+0
+],
+"VuMeshProjectTexUV": [
+"func",
+0
+],
+"VuMtxApplyTRS": [
+"func",
+0
+],
+"VuMtxApplyTRSEulerYXY": [
+"func",
+0
+],
+"VuMtxApplyTRSEulerZXY": [
+"func",
+0
+],
+"VuMtxApplyTRSQuat": [
+"func",
+0
+],
+"VuMtxBlend": [
+"func",
+0
+],
+"VuMtxInverse": [
+"func",
+0
+],
+"VuMtxInvertOrtho": [
+"func",
+0
+],
+"VuMtxMul": [
+"func",
+0
+],
+"VuMtxMulListMicro": [
+"func",
+0
+],
+"VuMtxNormalizeAxes": [
+"func",
+0
+],
+"VuMtxRotate": [
+"func",
+0
+],
+"VuMtxRotateQuat": [
+"func",
+0
+],
+"VuMtxScale": [
+"func",
+0
+],
+"VuMtxSetRotX": [
+"func",
+0
+],
+"VuMtxSetRotY": [
+"func",
+0
+],
+"VuMtxSetRotZ": [
+"func",
+0
+],
+"VuMtxStackLoad": [
+"func",
+0
+],
+"VuMtxStackPush": [
+"func",
+0
+],
+"VuMtxStackPushCopy": [
+"func",
+0
+],
+"VuMtxStackReset": [
+"func",
+0
+],
+"VuMtxStackScale": [
+"func",
+0
+],
+"VuMtxStackTranslate": [
+"func",
+0
+],
+"VuMtxTranslate": [
+"func",
+0
+],
+"VuMtxTranspose": [
+"func",
+0
+],
+"VuMtxTransposeMmi": [
+"func",
+0
+],
+"VuProjectVerts": [
+"func",
+0
+],
+"VuProjectorMatrixSet": [
+"func",
+0
+],
+"VuQuatSlerp": [
+"func",
+0
+],
+"VuQuatToEuler": [
+"func",
+0
+],
+"VuQuatToMatrix": [
+"func",
+0
+],
+"VuReflectYawPitch": [
+"func",
+0
+],
+"VuSegPlaneIntersect": [
+"func",
+0
+],
+"VuSinAngle": [
+"func",
+0
+],
+"VuSinCosAngle": [
+"func",
+0
+],
+"VuSinCosDeg": [
+"func",
+0
+],
+"VuSinCosRad": [
+"func",
+0
+],
+"VuSphereTriBoundHit": [
+"func",
+0
+],
+"VuSwap128": [
+"func",
+0
+],
+"VuTcbInterp": [
+"func",
+0
+],
+"VuVec4Clamp": [
+"func",
+0
+],
+"VuVec4Div": [
+"func",
+0
+],
+"VuVecClamp": [
+"func",
+0
+],
+"VuVecCopy": [
+"func",
+0
+],
+"VuVecDiv": [
+"func",
+0
+],
+"VuVecDot": [
+"func",
+0
+],
+"VuVecLerp": [
+"func",
+0
+],
+"VuVecLerp4": [
+"func",
+0
+],
+"VuVecNormalize": [
+"func",
+0
+],
+"VuVecNormalizeLen": [
+"func",
+0
+],
+"VuVecNormalizeRcpLen": [
+"func",
+0
+],
+"VuXformVec4Array": [
+"func",
+0
+],
+"WaitEventFlag": [
+"func",
+0
+],
+"WaitSema": [
+"func",
+0
+],
+"WakeupThread": [
+"func",
+0
+],
+"WmapVecApproach": [
+"func",
+0
+],
+"WmapWarpPutUv": [
+"func",
+0
+],
+"WmapWarpSendGrid": [
+"func",
+0
+],
+"_DisableDmac": [
+"func",
+0
+],
+"_DisableIntc": [
+"func",
+0
+],
+"_EnableDmac": [
+"func",
+0
+],
+"_EnableIntc": [
+"func",
+0
+],
+"_InvalidDCache": [
+"func",
+0
+],
+"_LIB_VERSION_vwr": [
+"data",
+4
+],
+"_SyncDCache": [
+"func",
+0
+],
+"__GetEntryAddress": [
+"func",
+0
+],
+"__SetSyscall": [
+"func",
+0
+],
+"__clz_tab_divdi3": [
+"data",
+256
+],
+"__clz_tab_moddi3": [
+"data",
+256
+],
+"__clz_tab_udivdi3": [
+"data",
+256
+],
+"__clz_tab_umoddi3": [
+"data",
+256
+],
+"__do_global_dtors_p": [
+"data",
+4
+],
+"__kCopy": [
+"func",
+0
+],
+"_addBlock": [
+"func",
+0
+],
+"_formPrediction": [
+"func",
+0
+],
+"_iDisableDmac": [
+"func",
+0
+],
+"_iDisableIntc": [
+"func",
+0
+],
+"_iEnableDmac": [
+"func",
+0
+],
+"_iEnableIntc": [
+"func",
+0
+],
+"_iRotateThreadReadyQueue": [
+"func",
+0
+],
+"_iSuspendThread": [
+"func",
+0
+],
+"_iWakeupThread": [
+"func",
+0
+],
+"_print": [
+"func",
+0
+],
+"_root": [
+"func",
+0
+],
+"_sbrkHeapPtr": [
+"data",
+4
+],
+"_sceCdCbCmd": [
+"data",
+4
+],
+"_sceCdCbSema": [
+"data",
+4
+],
+"_sceCdCbThreadId": [
+"data",
+4
+],
+"_sceCdCbfuncFmt": [
+"data",
+37
+],
+"_sceCdDebug": [
+"data",
+4
+],
+"_sceCdDiskReadyBind": [
+"data",
+4
+],
+"_sceCdDiskReadyBindErrStr": [
+"data",
+30
+],
+"_sceCdDiskReadyEndStr": [
+"data",
+18
+],
+"_sceCdDiskReadyStartStr": [
+"data",
+13
+],
+"_sceCdExitStr": [
+"data",
+14
+],
+"_sceCdInitBind": [
+"data",
+4
+],
+"_sceCdInitBindErrFmt": [
+"data",
+32
+],
+"_sceCdInitBusy": [
+"data",
+4
+],
+"_sceCdInitClear": [
+"data",
+4
+],
+"_sceCdInitCount": [
+"data",
+4
+],
+"_sceCdNCmdBind": [
+"data",
+4
+],
+"_sceCdNCmdBindErrStr": [
+"data",
+24
+],
+"_sceCdNCmdBusy": [
+"data",
+4
+],
+"_sceCdNCmdClient": [
+"data",
+48
+],
+"_sceCdNCmdNum": [
+"data",
+4
+],
+"_sceCdNCmdRecvBuf": [
+"data",
+4432
+],
+"_sceCdNCmdSema": [
+"data",
+4
+],
+"_sceCdNCmdSemaFailFmt": [
+"data",
+39
+],
+"_sceCdNCmdWaitStr": [
+"data",
+13
+],
+"_sceCdSCmdBind": [
+"data",
+4
+],
+"_sceCdSCmdBindErrStr": [
+"data",
+24
+],
+"_sceCdSCmdClient": [
+"data",
+56
+],
+"_sceCdSCmdNum": [
+"data",
+4
+],
+"_sceCdSCmdRecvBuf": [
+"data",
+1088
+],
+"_sceCdSCmdSema": [
+"data",
+4
+],
+"_sceCdSCmdSemaFailFmt": [
+"data",
+39
+],
+"_sceCdSCmdSendBuf": [
+"data",
+1032
+],
+"_sceCdSCmdWaitStr": [
+"data",
+13
+],
+"_sceCdSearchCallFmt": [
+"data",
+23
+],
+"_sceCdSearchFileBind": [
+"data",
+4
+],
+"_sceCdSearchFileBindErrStr": [
+"data",
+31
+],
+"_sceCdSearchLbnFmt": [
+"data",
+20
+],
+"_sceCdSearchNameFmt": [
+"data",
+16
+],
+"_sceCdSearchSizeFmt": [
+"data",
+16
+],
+"_sceCdSifCmdBind": [
+"data",
+4
+],
+"_sceCdSleepAlarmHandler": [
+"func",
+0
+],
+"_sceDmaChanHasTag": [
+"data",
+40
+],
+"_sceDmaChanTable": [
+"data",
+40
+],
+"_sceDmaDebugMode": [
+"data",
+24
+],
+"_sceDmaEnv": [
+"data",
+56
+],
+"_sceDmaMfdTable": [
+"data",
+16
+],
+"_sceDmaStdTable": [
+"data",
+16
+],
+"_sceDmaStsTable": [
+"data",
+16
+],
+"_sceDmaSyncTimeoutStr": [
+"data",
+22
+],
+"_sceFsAsyncSema": [
+"data",
+4
+],
+"_sceFsAsyncSemaTable": [
+"data",
+128
+],
+"_sceFsCallSema": [
+"data",
+4
+],
+"_sceFsCallbackHandler": [
+"func",
+0
+],
+"_sceFsFdSema": [
+"data",
+4
+],
+"_sceFsInitDone": [
+"data",
+4
+],
+"_sceFsWildVersion": [
+"data",
+4
+],
+"_sceFsWildVersionStr": [
+"data",
+5
+],
+"_sceGsDefDispEnvModeFmt": [
+"data",
+51
+],
+"_sceGsGParam": [
+"data",
+16
+],
+"_sceGsMskPath3Clear": [
+"data",
+16
+],
+"_sceGsResetPathVifCodes": [
+"data",
+32
+],
+"_sceGsStoreImageDmaTimeoutStr": [
+"data",
+52
+],
+"_sceGsStoreImageGsTimeoutStr": [
+"data",
+45
+],
+"_sceGsStoreImageRecvTimeoutStr": [
+"data",
+61
+],
+"_sceGsStoreImageVif1TimeoutStr": [
+"data",
+54
+],
+"_sceIpuInitIqMatrix": [
+"data",
+80
+],
+"_sceIpuInitVqClut": [
+"data",
+48
+],
+"_sceKernelAlarmPatch": [
+"data",
+1856
+],
+"_sceKernelAlarmPatchStub": [
+"data",
+40
+],
+"_sceKernelAlarmSyscallTable": [
+"data",
+64
+],
+"_sceKernelHelperErrStr": [
+"data",
+35
+],
+"_sceKernelHelperThreadId": [
+"data",
+4
+],
+"_sceLibgraphVersion": [
+"data",
+16
+],
+"_sceLibkernelVersion": [
+"data",
+12
+],
+"_sceLibkernelVersionNo": [
+"data",
+4
+],
+"_sceMcBindErrStr": [
+"data",
+20
+],
+"_sceMcCmdNo": [
+"data",
+4
+],
+"_sceMcOldMcmanStr": [
+"data",
+37
+],
+"_sceMcOldMcservStr": [
+"data",
+38
+],
+"_sceMcSema": [
+"data",
+4
+],
+"_sceMcSleepAlarmHandler": [
+"func",
+0
+],
+"_sceMpegAuxBottom": [
+"data",
+4
+],
+"_sceMpegAuxFrame": [
+"data",
+4
+],
+"_sceMpegAuxTop": [
+"data",
+4
+],
+"_sceMpegBdecErrorStr": [
+"data",
+27
+],
+"_sceMpegBfr": [
+"data",
+4
+],
+"_sceMpegBitsStale": [
+"data",
+92
+],
+"_sceMpegBitstreamFramenum": [
+"data",
+4
+],
+"_sceMpegBufTooSmallFmt": [
+"data",
+42
+],
+"_sceMpegBwdRefBottom": [
+"data",
+4
+],
+"_sceMpegBwdRefFrame": [
+"data",
+4
+],
+"_sceMpegBwdRefTop": [
+"data",
+4
+],
+"_sceMpegChromaFormatStr": [
+"data",
+35
+],
+"_sceMpegCscChunkDone": [
+"data",
+32
+],
+"_sceMpegCscError": [
+"data",
+8
+],
+"_sceMpegCscFromHandler": [
+"func",
+0
+],
+"_sceMpegCscHandlerErrorStr": [
+"data",
+20
+],
+"_sceMpegCurBottom": [
+"data",
+4
+],
+"_sceMpegCurFrame": [
+"data",
+4
+],
+"_sceMpegCurMp": [
+"data",
+4
+],
+"_sceMpegCurTop": [
+"data",
+4
+],
+"_sceMpegDcReset": [
+"data",
+4
+],
+"_sceMpegDefNonIntraQuantMatrix": [
+"data",
+64
+],
+"_sceMpegErrorFmt": [
+"data",
+16
+],
+"_sceMpegExtensionTable": [
+"data",
+44
+],
+"_sceMpegFieldCountTable": [
+"data",
+64
+],
+"_sceMpegFwdRefBottom": [
+"data",
+4
+],
+"_sceMpegFwdRefFrame": [
+"data",
+4
+],
+"_sceMpegFwdRefTop": [
+"data",
+4
+],
+"_sceMpegGopFrame": [
+"data",
+4
+],
+"_sceMpegGopSec": [
+"data",
+4
+],
+"_sceMpegImageAlignFmt": [
+"data",
+63
+],
+"_sceMpegIncnt": [
+"data",
+4
+],
+"_sceMpegInputBuf": [
+"data",
+40
+],
+"_sceMpegInputSize": [
+"data",
+4
+],
+"_sceMpegIntraSkipMbStr": [
+"data",
+18
+],
+"_sceMpegInvalidMotionTypeAFmt": [
+"data",
+30
+],
+"_sceMpegInvalidMotionTypeBFmt": [
+"data",
+30
+],
+"_sceMpegInvalidMotionTypeCFmt": [
+"data",
+30
+],
+"_sceMpegInvalidMotionTypeFmt": [
+"data",
+36
+],
+"_sceMpegIpuCmdInvalidatesBfr": [
+"data",
+40
+],
+"_sceMpegLoadChromaIntraQmStr": [
+"data",
+40
+],
+"_sceMpegLoadChromaNonIntraQmStr": [
+"data",
+45
+],
+"_sceMpegMbAddrIncFmt": [
+"data",
+51
+],
+"_sceMpegMbSlots": [
+"data",
+648
+],
+"_sceMpegOddFieldPicturesStr": [
+"data",
+29
+],
+"_sceMpegPackHeaderFieldFlagStr": [
+"data",
+46
+],
+"_sceMpegPesFlagBits": [
+"data",
+32
+],
+"_sceMpegPicBottom0": [
+"data",
+104
+],
+"_sceMpegPicBottom1": [
+"data",
+104
+],
+"_sceMpegPicBottom2": [
+"data",
+104
+],
+"_sceMpegPicDts": [
+"data",
+8
+],
+"_sceMpegPicFrame0": [
+"data",
+104
+],
+"_sceMpegPicFrame1": [
+"data",
+104
+],
+"_sceMpegPicFrame2": [
+"data",
+104
+],
+"_sceMpegPicPts": [
+"data",
+8
+],
+"_sceMpegPicSpatialScalableExtStr": [
+"data",
+51
+],
+"_sceMpegPicStructureStr": [
+"data",
+28
+],
+"_sceMpegPicTemporalScalableExtStr": [
+"data",
+52
+],
+"_sceMpegPicTop0": [
+"data",
+104
+],
+"_sceMpegPicTop1": [
+"data",
+104
+],
+"_sceMpegPicTop2": [
+"data",
+104
+],
+"_sceMpegPictureDone": [
+"data",
+8
+],
+"_sceMpegPredCAvg": [
+"func",
+0
+],
+"_sceMpegPredCAvgH": [
+"func",
+0
+],
+"_sceMpegPredCAvgHV": [
+"func",
+0
+],
+"_sceMpegPredCAvgV": [
+"func",
+0
+],
+"_sceMpegPredCFuncs": [
+"data",
+32
+],
+"_sceMpegPredCPut": [
+"func",
+0
+],
+"_sceMpegPredCPutH": [
+"func",
+0
+],
+"_sceMpegPredCPutHV": [
+"func",
+0
+],
+"_sceMpegPredCPutV": [
+"func",
+0
+],
+"_sceMpegPredYAvg": [
+"func",
+0
+],
+"_sceMpegPredYAvgH": [
+"func",
+0
+],
+"_sceMpegPredYAvgHV": [
+"func",
+0
+],
+"_sceMpegPredYAvgV": [
+"func",
+0
+],
+"_sceMpegPredYFuncs": [
+"data",
+32
+],
+"_sceMpegPredYPut": [
+"func",
+0
+],
+"_sceMpegPredYPutH": [
+"func",
+0
+],
+"_sceMpegPredYPutHV": [
+"func",
+0
+],
+"_sceMpegPredYPutV": [
+"func",
+0
+],
+"_sceMpegProfileLevelStr": [
+"data",
+27
+],
+"_sceMpegRefDmaTags": [
+"data",
+4
+],
+"_sceMpegSecondFieldMissingStr": [
+"data",
+29
+],
+"_sceMpegSeqScalableExtStr": [
+"data",
+48
+],
+"_sceMpegSkipPictureStr": [
+"data",
+29
+],
+"_sceMpegSkippedMbIPicStr": [
+"data",
+45
+],
+"_sceMpegSliceA0ErrorStr": [
+"data",
+27
+],
+"_sceMpegSliceStartCodeFmt": [
+"data",
+38
+],
+"_sceMpegSprPred": [
+"data",
+4
+],
+"_sceMpegSprWork": [
+"data",
+4
+],
+"_sceMpegStrTypeTable": [
+"data",
+160
+],
+"_sceMpegTooManyMbStr": [
+"data",
+32
+],
+"_sceMpegUnknownExtensionStr": [
+"data",
+19
+],
+"_sceMpegVerticalSizeStr": [
+"data",
+21
+],
+"_sceMpegWorkAreaSizeStr": [
+"data",
+29
+],
+"_sceMpegWorkAreaTooSmallStr": [
+"data",
+36
+],
+"_scePadBufAlignFmt": [
+"data",
+48
+],
+"_scePadDebugPrint": [
+"data",
+4
+],
+"_scePadDmaInvalidStr": [
+"data",
+36
+],
+"_scePadEmptyStr": [
+"data",
+8
+],
+"_scePadInitDone": [
+"data",
+4
+],
+"_scePadPortOpenFmt": [
+"data",
+44
+],
+"_scePadReqStateStrTable": [
+"data",
+12
+],
+"_scePadReqStrBusy": [
+"data",
+5
+],
+"_scePadReqStrComplete": [
+"data",
+10
+],
+"_scePadReqStrFailed": [
+"data",
+7
+],
+"_scePadStateStrDisconnect": [
+"data",
+12
+],
+"_scePadStateStrError": [
+"data",
+6
+],
+"_scePadStateStrExecCmd": [
+"data",
+8
+],
+"_scePadStateStrFindCtp1": [
+"data",
+10
+],
+"_scePadStateStrStable": [
+"data",
+7
+],
+"_scePadStateStrTable": [
+"data",
+32
+],
+"_scePrintfLinePos": [
+"data",
+4
+],
+"_scePrintfPutchar": [
+"data",
+4
+],
+"_sceSifCmdInitDone": [
+"data",
+4
+],
+"_sceSifCmdIntrHandler": [
+"func",
+0
+],
+"_sceSifLoadAllSecStr": [
+"data",
+5
+],
+"_sceSifLoadBindState": [
+"data",
+4
+],
+"_sceSifLoadWildVersion": [
+"data",
+24
+],
+"_sceSifLoadWildVersionStr": [
+"data",
+5
+],
+"_sceSifRebootTooLongFmt": [
+"data",
+26
+],
+"_sceSifRebootUdnlStr": [
+"data",
+12
+],
+"_sceSifRpcInitDone": [
+"data",
+8
+],
+"_sceTtyInitDone": [
+"data",
+4
+],
+"_sceTtyPacketSizeErrStr": [
+"data",
+37
+],
+"_sceTtyRecvErrStr": [
+"data",
+20
+],
+"_sceTtySendErrFmt": [
+"data",
+19
+],
+"_sceTtyWlenErrFmt": [
+"data",
+24
+],
+"_start": [
+"func",
+0
+],
+"alternate_scan": [
+"data",
+8
+],
+"aspect_ratio_information": [
+"data",
+4
+],
+"backward_f_code": [
+"data",
+8
+],
+"bit_rate_value": [
+"data",
+4
+],
+"broken_link": [
+"data",
+4
+],
+"burst_amplitude": [
+"data",
+4
+],
+"chroma_420_type": [
+"data",
+4
+],
+"chroma_format": [
+"data",
+4
+],
+"closed_gop": [
+"data",
+4
+],
+"color_description": [
+"data",
+4
+],
+"color_primaries": [
+"data",
+4
+],
+"composite_display_flag": [
+"data",
+4
+],
+"concealment_motion_vectors": [
+"data",
+4
+],
+"constrained_parameters_flag": [
+"data",
+4
+],
+"copyright_flag": [
+"data",
+4
+],
+"copyright_identifier": [
+"data",
+4
+],
+"copyright_number_1": [
+"data",
+4
+],
+"copyright_number_2": [
+"data",
+4
+],
+"copyright_number_3": [
+"data",
+4
+],
+"default_intra_quantizer_matrix": [
+"data",
+64
+],
+"display_horizontal_size": [
+"data",
+4
+],
+"display_vertical_size": [
+"data",
+4
+],
+"drop_flag": [
+"data",
+4
+],
+"f_code": [
+"data",
+16
+],
+"field_sequence": [
+"data",
+4
+],
+"forward_f_code": [
+"data",
+4
+],
+"frame_center_horizontal_offset": [
+"data",
+16
+],
+"frame_center_vertical_offset": [
+"data",
+12
+],
+"frame_pred_frame_dct": [
+"data",
+4
+],
+"frame_rate_code": [
+"data",
+4
+],
+"frame_rate_extension_d": [
+"data",
+4
+],
+"frame_rate_extension_n": [
+"data",
+4
+],
+"full_pel_backward_vector": [
+"data",
+4
+],
+"full_pel_forward_vector": [
+"data",
+4
+],
+"func_00400000": [
+"func",
+0
+],
+"func_0045D620": [
+"func",
+0
+],
+"func_0048E7BC": [
+"func",
+0
+],
+"func_00666008": [
+"func",
+0
+],
+"func_006DEBB0": [
+"func",
+0
+],
+"func_0070334C": [
+"func",
+0
+],
+"gphClipOneXMax": [
+"func",
+0
+],
+"gphClipOneXMin": [
+"func",
+0
+],
+"gphClipOneYMax": [
+"func",
+0
+],
+"gphClipOneYMin": [
+"func",
+0
+],
+"gphClipTwoXMax": [
+"func",
+0
+],
+"gphClipTwoXMin": [
+"func",
+0
+],
+"gphClipTwoYMax": [
+"func",
+0
+],
+"gphClipTwoYMin": [
+"func",
+0
+],
+"horizontal_size": [
+"data",
+4
+],
+"hour": [
+"data",
+4
+],
+"iCancelWakeupThread": [
+"func",
+0
+],
+"iChangeThreadPriority": [
+"func",
+0
+],
+"iClearEventFlag": [
+"func",
+0
+],
+"iCpuConfig": [
+"func",
+0
+],
+"iDisableDmacHandler": [
+"func",
+0
+],
+"iDisableIntcHandler": [
+"func",
+0
+],
+"iEnableDmacHandler": [
+"func",
+0
+],
+"iEnableIntcHandler": [
+"func",
+0
+],
+"iFlushCache": [
+"func",
+0
+],
+"iGetCop0": [
+"func",
+0
+],
+"iGsGetIMR": [
+"func",
+0
+],
+"iGsPutIMR": [
+"func",
+0
+],
+"iPollEventFlag": [
+"func",
+0
+],
+"iPollSema": [
+"func",
+0
+],
+"iReferEventFlagStatus": [
+"func",
+0
+],
+"iReferSemaStatus": [
+"func",
+0
+],
+"iReferThreadStatus": [
+"func",
+0
+],
+"iReleaseAlarm": [
+"func",
+0
+],
+"iReleaseWaitThread": [
+"func",
+0
+],
+"iResumeThread": [
+"func",
+0
+],
+"iSetAlarm": [
+"func",
+0
+],
+"iSetEventFlag": [
+"func",
+0
+],
+"iSignalSema": [
+"func",
+0
+],
+"iSuspendThread": [
+"func",
+0
+],
+"iTerminateThread": [
+"func",
+0
+],
+"iWakeupThread": [
+"func",
+0
+],
+"intra_dc_precision": [
+"data",
+4
+],
+"intra_slice": [
+"data",
+8
+],
+"intra_vlc_format": [
+"data",
+4
+],
+"isceSifDmaStat": [
+"func",
+0
+],
+"isceSifSetDChain": [
+"func",
+0
+],
+"isceSifSetDma": [
+"func",
+0
+],
+"jtbl_00673630": [
+"data",
+368
+],
+"jtbl_00673880": [
+"data",
+32
+],
+"jtbl_006738A0": [
+"data",
+24
+],
+"jtbl_00673E30": [
+"data",
+64
+],
+"jtbl_00675050": [
+"data",
+208
+],
+"jtbl_00675680": [
+"data",
+32
+],
+"jtbl_006756A0": [
+"data",
+24
+],
+"jtbl_006DFFF0": [
+"data",
+40
+],
+"load_intra_quantizer_matrix": [
+"data",
+4
+],
+"load_non_intra_quantizer_matrix": [
+"data",
+12
+],
+"low_delay": [
+"data",
+4
+],
+"matrix_coefficients": [
+"data",
+4
+],
+"mb_height": [
+"data",
+4
+],
+"mb_width": [
+"data",
+4
+],
+"memchr": [
+"func",
+0
+],
+"memcmp": [
+"func",
+0
+],
+"memcpy": [
+"func",
+0
+],
+"memmove": [
+"func",
+0
+],
+"memset": [
+"func",
+0
+],
+"minute": [
+"data",
+4
+],
+"original_or_copy": [
+"data",
+4
+],
+"picture_coding_type": [
+"data",
+4
+],
+"picture_structure": [
+"data",
+4
+],
+"profile_and_level_indication": [
+"data",
+4
+],
+"progressive_frame": [
+"data",
+4
+],
+"progressive_sequence": [
+"data",
+4
+],
+"q_scale_type": [
+"data",
+4
+],
+"quantizer_scale_code": [
+"data",
+4
+],
+"repeat_first_field": [
+"data",
+4
+],
+"sbrk": [
+"func",
+0
+],
+"sceCdCbfunc_num": [
+"data",
+40
+],
+"sceGsDefDispEnv": [
+"func",
+0
+],
+"sceGsResetPath": [
+"func",
+0
+],
+"scePadPortOpen": [
+"func",
+0
+],
+"sceSifDmaStat": [
+"func",
+0
+],
+"sceSifGetReg": [
+"func",
+0
+],
+"sceSifSetDChain": [
+"func",
+0
+],
+"sceSifSetDma": [
+"func",
+0
+],
+"sceSifSetReg": [
+"func",
+0
+],
+"sceSifStopDma": [
+"func",
+0
+],
+"sceSifWriteBackDCache": [
+"func",
+0
+],
+"strcat": [
+"func",
+0
+],
+"strcmp": [
+"func",
+0
+],
+"strcpy": [
+"func",
+0
+],
+"strlen": [
+"func",
+0
+],
+"strncmp": [
+"func",
+0
+],
+"strncpy": [
+"func",
+0
+],
+"sub_carrier": [
+"data",
+4
+],
+"sub_carrier_phase": [
+"data",
+8
+],
+"temporal_reference": [
+"data",
+4
+],
+"temporal_reference_old": [
+"data",
+8
+],
+"temporal_reference_wrap": [
+"data",
+4
+],
+"top_field_first": [
+"data",
+4
+],
+"transfer_characteristics": [
+"data",
+4
+],
+"v_axis": [
+"data",
+4
+],
+"vbv_buffer_size": [
+"data",
+4
+],
+"vbv_delay": [
+"data",
+4
+],
+"vertical_size": [
+"data",
+4
+],
+"video_format": [
+"data",
+4
+],
+"vuMicroCode0": [
+"func",
+0
+],
+"vuMicroCode1": [
+"func",
+0
+],
+"vuMicroCode1End": [
+"data",
+144
+]
+}
