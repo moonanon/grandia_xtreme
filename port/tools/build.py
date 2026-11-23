@@ -880,7 +880,8 @@ def main():
             sys.exit(err)
         rsp = os.path.join(OUT, "link.rsp")
         with open(rsp, "w") as f:
-            f.write("\n".join(o.replace("\\", "/") for o in objs + [stub_obj, marks[1]]))
+            # Quoted: a path may have spaces in it
+            f.write("\n".join('"' + o.replace("\\", "/") + '"' for o in objs + [stub_obj, marks[1]]))
         if LINUX:
             exports = os.path.join(OUT, "exports.map")
             with open(exports, "w") as f:
@@ -899,9 +900,6 @@ def main():
         else:
             link_cmd = None
         p = subprocess.run(link_cmd or [clang, "-target", TARGET, "-o", exe, "@" + rsp, "-g",
-            # Quoted: a path may have spaces in it
-            f.write("\n".join('"' + o.replace("\\", "/") + '"' for o in objs + [stub_obj, marks[1]]))
-        p = subprocess.run([clang, "-target", TARGET, "-o", exe, "@" + rsp, "-g",
                             "-Wl,--error-limit=0", "-Wl,-Map," + os.path.join(OUT, "grandia.map"),
                             # No ASLR: addresses in crash reports match the
                             # map, and the layout stays the same from run to run
