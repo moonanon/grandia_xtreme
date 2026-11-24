@@ -317,6 +317,7 @@ easier to come and go from, as the later ones already are.
 | `land-ruins-3-geo-gate` | Land Ruins 3's exit-only Geo Gate made two-way | `mdt/4050.mdp`-`4053.mdp` |
 | `aqua-ruins-geo-gate` | the Energy Conversion area's exit-only Geo Gate made two-way | `mdt/50F0.mdp`-`50F3.mdp` |
 | `gale-ruins-3-geo-gate` | a new Geo Gate deeper in Gale Ruins (map 0x5830) | `mdt/5830.mdp`-`5833.mdp` |
+| `guaranteed-drops` | Pirate's Ring and Thief Trick give +20% a level, so at level 5 enemies always drop an item (and from the best items they have); the Pirate's Ring text no longer says "gold" | `grxsys.grxp` |
 | `map-overlay` | M (or R3) spreads the minimap flat over the whole field, as Final Fantasy XII's, while you keep walking | none: a line in `mods.txt` |
 | `minimap-entrances` | the minimap shows every map's entrances, and Geo Gates in cyan (the game shows them on the corridor floors only) | none: a line in `mods.txt` |
 
@@ -374,6 +375,7 @@ files are not included (`textures/` is git-ignored).
 | `port/tests/` | tests for the platform layer's pieces |
 | `port/tools/grxdbg.py` | reads and writes a frozen game's memory by C name (F9) |
 | `port/tools/mods.py`, `port/tools/mdt.py` | the Geo Gate mods' map patches; reads and disassembles map files |
+| `port/tools/grxsys.py`, `port/src/grxsys_patch.c` | mods that patch the system data (items, skills): builds `mods/grxsys.grxp`, applied as the game unpacks `GRXSYS.PAC` |
 
 ## Third-party library code
 

@@ -28,6 +28,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mdt  # noqa: E402
+import grxsys  # noqa: E402
 
 # map, position (where the player stands at the gate), facing, name in the list,
 # global flags (free: 0x3D8, 0x3F4, 0x3FC): `flag` activated (the list shows
@@ -59,6 +60,13 @@ CODE_MODS = [
     dict(mod="minimap-entrances",
          desc="the minimap shows every map's entrances and Geo Gates (the game shows them on the "
               "auto-built corridor floors only)"),
+]
+
+# Mods that patch the system data (grxsys.py): one file, mods/grxsys.grxp
+GRXSYS_MODS = [
+    dict(mod="guaranteed-drops",
+         desc="Pirate's Ring and Thief Trick give +20% a level: at level 5 enemies always drop an item, "
+              "and from the best items they have"),
 ]
 
 TEMPLATE_MAP = 0x5020
@@ -578,7 +586,7 @@ def main(argv):
     ap.add_argument("--without", action="append", default=[], metavar="NAME", help="leave this mod out")
     ap.add_argument("--list", action="store_true", help="list the mods and stop")
     a = ap.parse_args(argv)
-    every = GATES + CODE_MODS
+    every = GATES + CODE_MODS + GRXSYS_MODS
     if a.list:
         for m in every:
             print("%-24s %s" % (m["mod"], m["desc"]))
@@ -612,6 +620,7 @@ def main(argv):
         f.write("# flag value name (port/src/mdt_patch.c: the town gate's extra destinations)\n")
         for g in gates:
             f.write("%#x %#x %s\n" % (g["flag"], g["value"], g["name"]))
+    grxsys.build(iso, [m["mod"] for m in GRXSYS_MODS if m["mod"] not in a.without], a.out)
     with open(os.path.join(a.out, "mods.txt"), "w") as f:
         f.write("# The mods built (port/tools/mods.py), one a line\n")
         for m in every:
