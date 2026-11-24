@@ -1,7 +1,7 @@
 /* Skipping cut scenes (port/docs/scene-skip.md): --scene-skip on|off, or
    GRX_SCENE_SKIP. In a cut scene (a field event the player didn't start
    by talking to someone, or a movie) START shows "Hold START to skip",
-   and held for 5 seconds skips the rest. A skip runs the scene
+   and held for 1.5 seconds skips the rest. A skip runs the scene
    to its end, as fast as the game goes, behind a black screen and with
    the sound off: messages are passed, and everything the scene does
    (flags, items, party, map changes) still happens. It stops early where
@@ -43,6 +43,35 @@ int grx_skip_fast(void);
    before drawing one, `n` (the game's choice) but during a skip */
 int grx_skip_updates(int n);
 
+/* Fast forward (Tab): cycles the speed 1 -> 2 -> 4 -> 1. The field clock
+   runs that many times faster while the sound device keeps real time, so
+   music and voices play at their own speed. Shown as ">> n". */
+void grx_turbo_cycle(void);
+
+/* The speed now: the one picked, but 1 during a scene skip or a movie */
+int grx_turbo_speed(void);
+
+/* Spot recorder (spots.c): F8 asks for one; video.c runs grx_spot_field
+   once a field, which appends the leader's map and position to spots.txt */
+void grx_spot_request(void);
+void grx_spot_field(void);
+
+/* Debug kit (build.py --debug, GRX_DEBUG_KIT) */
+void grx_noclip_toggle(void);
+void grx_super_toggle(void);
+int grx_super(void);
+void grx_warp_request(int step);
+void grx_gate_warp_request(int step);
+int grx_map_reveal(void);
+int grx_map_reveal_changed(void);
+void grx_map_reveal_toggle(void);
+int grx_noclip(void);
+/* The debug list, top right (menu.c): F12 hides and shows it */
+void grx_debug_hud_toggle(void);
+
+/* Shows "Location recorded" for a couple of seconds, in the prompt's style */
+void grx_skip_notice(void);
+
 /* The presenter (GL context current, default framebuffer bound): the
    prompt and the skip's black screen over the picture, which is at
    (x, y, w, h) in a window of ww x wh pixels */
@@ -54,5 +83,11 @@ void grx_skip_draw_gl(int x, int y, int w, int h, int ww, int wh);
    B progress bar track. Sets *w, *h and the bar's x range in pixels;
    returns a malloc'd picture or NULL. */
 unsigned char *grx_skip_art(int text_px, int kind, int button, int *w, int *h, int *bar_x0, int *bar_x1);
+
+/* The port menu's picture (port/src/menu.c), in the same channels: tab
+   `tab` and row `sel` in B (gold), the rest in R; malloc'd, w x h */
+unsigned char *grx_menu_art(int text_px, const char *const *tabs, int ntabs, int tab, const char *const *labels,
+                            const char *const *values,
+                            int rows, int sel, int *w, int *h);
 
 #endif

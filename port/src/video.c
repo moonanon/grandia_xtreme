@@ -65,6 +65,8 @@
 #include "grx_debug.h"
 #include "grx_buttons.h"
 #include "grx_skip.h"
+#include "grx_menu.h"
+#include "grx_input.h"
 #include "grx_state_parts.h"
 #include "grx_video_opts.h"
 
@@ -792,6 +794,7 @@ static void present_once(void) {
     }
     draw(&show);
     grx_skip_draw_gl(pic_x, pic_y, pic_w, pic_h, SDL_GetAtomicInt(&win_w), SDL_GetAtomicInt(&win_h));
+    grx_menu_draw_gl(pic_x, pic_y, pic_w, pic_h, SDL_GetAtomicInt(&win_w), SDL_GetAtomicInt(&win_h));
     present_snapshot();
     SDL_GL_SwapWindow(window);
     SDL_AddAtomicU32(&present_count, 1);
@@ -1118,13 +1121,52 @@ void grx_video_pump(void) {
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
             quit("window closed");
             break;
+        case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+            /* The open port menu takes the gamepad too (the game waits) */
+            grx_menu_pad(ev.gbutton.button);
+            break;
         case SDL_EVENT_KEY_DOWN:
             if (!ev.key.repeat && grx_dbg_key(ev.key.key)) {
+                break;
+            }
+            /* The port menu: Esc opens it (not while the Configurations
+               page waits for a key, where Esc cancels); open, it takes the keys */
+            if (grx_menu_key(ev.key.key, ev.key.scancode)) {
+                break;
+            }
+            if (!ev.key.repeat && ev.key.key == SDLK_ESCAPE && !grx_input_capturing()) {
+                grx_menu_toggle();
                 break;
             }
             if (!ev.key.repeat &&
                 (ev.key.key == SDLK_F11 || (ev.key.key == SDLK_RETURN && (ev.key.mod & SDL_KMOD_ALT)))) {
                 toggle_fullscreen();
+            }
+            if (!ev.key.repeat && grx_action_for_key(ev.key.scancode) >= 0) {
+                grx_action_run(grx_action_for_key(ev.key.scancode));
+            }
+#ifdef GRX_DEBUG_KIT
+            if (!ev.key.repeat && ev.key.key == SDLK_F5) {
+                grx_super_toggle();
+            }
+            if (!ev.key.repeat && ev.key.key == SDLK_F6 && (ev.key.mod & SDL_KMOD_CTRL)) {
+                grx_gate_warp_request((ev.key.mod & SDL_KMOD_SHIFT) ? -1 : 1);
+            } else if (!ev.key.repeat && ev.key.key == SDLK_F6) {
+                grx_warp_request((ev.key.mod & SDL_KMOD_SHIFT) ? -1 : 1);
+            }
+            if (!ev.key.repeat && ev.key.key == SDLK_F7) {
+                if (ev.key.mod & SDL_KMOD_SHIFT) {
+                    grx_map_reveal_toggle();
+                } else {
+                    grx_noclip_toggle();
+                }
+            }
+            if (!ev.key.repeat && ev.key.key == SDLK_F12) {
+                grx_debug_hud_toggle();
+            }
+#endif
+            if (!ev.key.repeat && ev.key.key == SDLK_F8) {
+                grx_spot_request();
             }
             /* Save states: F1-F4 load slot 1-4, Shift+F1-F4 save there */
             if (!ev.key.repeat && ev.key.key >= SDLK_F1 && ev.key.key <= SDLK_F4) {
@@ -1183,13 +1225,13 @@ static uint64_t field_due(uint64_t n) {
 static void lock_to_display(uint64_t now) {
     static int logged = -1;
     uint64_t want = FIELD_NUM, refresh_num = 0, swap, due, r;
-    int mhz = SDL_GetAtomicInt(&refresh_mhz), k = 0, locked;
+    int mhz = SDL_GetAtomicInt(&refresh_mhz), k = 0, locked, turbo = grx_turbo_speed();
     int64_t ph, err, adj;
 
     SDL_LockMutex(lock);
     swap = last_swap_ns;
     SDL_UnlockMutex(lock);
-    if (gl_up && threaded && !hidden && vsync_mode != 0 && mhz > 0 && swap != 0 &&
+    if (turbo == 1 && gl_up && threaded && !hidden && vsync_mode != 0 && mhz > 0 && swap != 0 &&
         !SDL_GetAtomicInt(&minimized) && !grx_movie_playing()) {
         refresh_num = 1000000000000ull * FIELD_DEN / (uint64_t)mhz;
         k = (int)((FIELD_NUM + refresh_num / 2) / refresh_num);
@@ -1205,6 +1247,9 @@ static void lock_to_display(uint64_t now) {
     }
     locked = want != FIELD_NUM;
     SDL_SetAtomicInt(&lock_k, locked ? k : 0);
+    if (turbo > 1) {
+        want = FIELD_NUM / (uint64_t)turbo;
+    }
     if (want != field_num) {
         base_ns = field_due(fields);
         base_field = fields;
@@ -1359,6 +1404,7 @@ static void run_field(void) {
     grx_pad_update();
     grx_buttons_field();
     grx_skip_field();
+    grx_spot_field();
     fields++;
     grx_dbg_field(fields);
     grx_kernel_field();
@@ -1369,16 +1415,16 @@ static void run_field(void) {
    window stays alive and the tool's requests are served. Then the field
    clock starts again from now. 1 if it held. */
 static int hold(void) {
-    if (!grx_dbg_holding()) {
+    if (!grx_dbg_holding() && !grx_menu_open()) {
         return 0;
     }
-    if (window != NULL) {
+    if (window != NULL && grx_dbg_holding()) {
         char title[96];
         snprintf(title, sizeof(title), "Grandia Xtreme - frozen at field %llu (F9 resumes, F10 steps)",
                  (unsigned long long)fields);
         SDL_SetWindowTitle(window, title);
     }
-    while (grx_dbg_holding()) {
+    while (grx_dbg_holding() || grx_menu_open()) {
         grx_video_present();
         present_inline();
         grx_video_pump();

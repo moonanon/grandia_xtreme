@@ -373,6 +373,9 @@ static u16 scripted(void) {
 }
 
 /* Fill the 32 data bytes and the length for the port's current mode */
+/* The port actions' gamepad inputs held (port 0), for their press */
+static unsigned act_held;
+
 static void sample(Port *p, int port) {
     u16 down = 0, keys_down;
     u8 press[12];
@@ -403,8 +406,23 @@ static void sample(Port *p, int port) {
     }
     keys_down = down;
     if (p->gp != NULL) {
+        int a;
+        /* The port's actions (grx_input.h) on their press; their inputs
+           aren't the game's */
+        for (a = 0; a < GRX_ACT_COUNT; a++) {
+            int v = pad_level(p->gp, grx_action_get(GRX_IN_PAD, a)) != 0;
+            if (port == 0 && v && !(act_held & (1u << a))) {
+                grx_action_run(a);
+            }
+            if (port == 0) {
+                act_held = v ? act_held | (1u << a) : act_held & ~(1u << a);
+            }
+        }
         for (i = 0; i < GRX_IN_COUNT; i++) {
-            int v = pad_level(p->gp, grx_input_get(GRX_IN_PAD, i));
+            int code = grx_input_get(GRX_IN_PAD, i), v;
+            for (a = 0; a < GRX_ACT_COUNT && grx_action_get(GRX_IN_PAD, a) != code; a++)
+                ;
+            v = a == GRX_ACT_COUNT ? pad_level(p->gp, code) : 0;
             if (v) {
                 down |= (u16)grx_input_bit(i);
                 /* L2 and R2's pressure: a trigger's level */
@@ -421,6 +439,14 @@ static void sample(Port *p, int port) {
         sticks[3] = stick(SDL_GetGamepadAxis(p->gp, SDL_GAMEPAD_AXIS_LEFTY));
     }
     if (port == 0) {
+        /* The keyboard's directions also push the left stick: the field
+           walks by the stick in analog mode */
+        if (keys_down & (B_UP | B_DOWN | B_LEFT | B_RIGHT)) {
+            if (sticks[2] == 0x80 && sticks[3] == 0x80) {
+                sticks[2] = (keys_down & B_LEFT) ? 0x00 : (keys_down & B_RIGHT) ? 0xFF : 0x80;
+                sticks[3] = (keys_down & B_UP) ? 0x00 : (keys_down & B_DOWN) ? 0xFF : 0x80;
+            }
+        }
         for (i = 0; i < 4; i++) {
             if (script_st[i] != 0x80) {
                 sticks[i] = script_st[i];

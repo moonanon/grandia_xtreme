@@ -87,9 +87,9 @@ void grx_unimplemented(const char *name) {
 }
 
 static void usage(void) {
-    printf("Grandia Xtreme port: it can't boot all the way yet (port/README.md).\n"
+    printf("Grandia Xtreme port (port/README.md).\n"
            "\n"
-           "  grandia --boot [options]        boot the game anyway\n"
+           "  grandia --boot [options]        boot the game\n"
            "  grandia --video-test [options]  the frame loop alone: the game's vsync, a test picture\n"
            "  grandia --pad-test [options]    the game's pad code: prints what it reads\n"
            "\n"
@@ -108,7 +108,7 @@ static void usage(void) {
            "  --camera C       stick (the default: the right stick turns and tilts the field\n"
            "                   camera; L1 and R1 still turn it) or buttons (L1 and R1 only, as\n"
            "                   the original; or set GRX_CAMERA)\n"
-           "  --scene-skip S   on (the default: in a cut scene, hold START for 5 seconds to\n"
+           "  --scene-skip S   on (the default: in a cut scene, hold START for 1.5 seconds to\n"
            "                   skip it) or off (or set GRX_SCENE_SKIP)\n"
            "  --fullscreen    start fullscreen (Alt+Enter, F11 or a double click toggles)\n"
            "  --integer        scale by whole multiples of the picture's height\n"
@@ -315,8 +315,7 @@ static int grx_main(int argc, char **argv)
         }
     }
     if (mode == NULL) {
-        /* The game can't boot all the way yet (port/README.md, "Status"),
-           so booting it is opt-in */
+        /* Booting is asked for with --boot; with no mode, the usage */
         usage();
         return 0;
     }

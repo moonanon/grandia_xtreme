@@ -15,6 +15,8 @@
 #include "grx_buttons.h"
 #include "grx_video_opts.h"
 #include "grx_platform.h"
+#include "grx_skip.h"
+#include "grx_minimap.h"
 
 #define CAPTURE_MS 5000
 
@@ -48,6 +50,15 @@ static const int key_defaults[GRX_IN_COUNT] = {
 static int custom[2];
 static int map[2][GRX_IN_COUNT];
 
+/* The port's own actions: [port] in grandia.ini, "<name>_pad" and
+   "<name>_key" (one line each, so the section only has what was changed) */
+static const char *const act_ini[GRX_ACT_COUNT] = {"fast_forward", "map_overlay"};
+static const char *const act_labels[GRX_ACT_COUNT] = {"Fast forward", "Map overlay"};
+static const int act_pad_defaults[GRX_ACT_COUNT] = {SDL_GAMEPAD_BUTTON_LEFT_STICK, SDL_GAMEPAD_BUTTON_RIGHT_STICK};
+static const int act_key_defaults[GRX_ACT_COUNT] = {SDL_SCANCODE_TAB, SDL_SCANCODE_M};
+static int act_custom[2][GRX_ACT_COUNT];
+static int act_map[2][GRX_ACT_COUNT];
+
 /* The capture: 0 none, 1 waiting for everything to be let go, 2 for a
    press, 3 done (until everything is let go) */
 static int cap_state, cap_kind, cap_result = -1;
@@ -68,12 +79,87 @@ int grx_input_get(int kind, int b) {
     return custom[kind] ? map[kind][b] : get_default(kind, b);
 }
 
+int grx_action_get(int kind, int a) {
+    if (act_custom[kind][a]) {
+        return act_map[kind][a];
+    }
+    return kind == GRX_IN_KEY ? act_key_defaults[a] : act_pad_defaults[a];
+}
+
+const char *grx_action_label(int a) {
+    return act_labels[a];
+}
+
+int grx_action_for_key(int key) {
+    int a;
+    for (a = 0; a < GRX_ACT_COUNT; a++) {
+        if (key != GRX_IN_NONE && grx_action_get(GRX_IN_KEY, a) == key) {
+            return a;
+        }
+    }
+    return -1;
+}
+
+static void save(void);
+
+int grx_action_key_ok(int key) {
+    int b;
+    if (key <= 0 || key == SDL_SCANCODE_ESCAPE || (key >= SDL_SCANCODE_F1 && key <= SDL_SCANCODE_F12)) {
+        return 0;
+    }
+    for (b = 0; b < GRX_IN_COUNT; b++) {
+        if (grx_input_get(GRX_IN_KEY, b) == key) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int grx_action_pad_ok(int code) {
+    int b;
+    for (b = 0; b < GRX_IN_COUNT; b++) {
+        if (b != GRX_IN_L3 && b != GRX_IN_R3 && grx_input_get(GRX_IN_PAD, b) == code) {
+            return 0;
+        }
+    }
+    return code != GRX_IN_NONE;
+}
+
+void grx_action_run(int a) {
+    switch (a) {
+    case GRX_ACT_FAST_FORWARD:
+        grx_turbo_cycle();
+        break;
+    case GRX_ACT_MAP_OVERLAY:
+        grx_map_overlay_toggle();
+        break;
+    }
+}
+
+void grx_action_set(int kind, int a, int code) {
+    int o;
+    /* An input on one action only: the other gets this one's old input */
+    for (o = 0; o < GRX_ACT_COUNT; o++) {
+        if (o != a && code != GRX_IN_NONE && grx_action_get(kind, o) == code) {
+            act_map[kind][o] = grx_action_get(kind, a);
+            act_custom[kind][o] = 1;
+        }
+    }
+    act_map[kind][a] = code;
+    act_custom[kind][a] = 1;
+    save();
+}
+
+void grx_action_reset(void) {
+    memset(act_custom, 0, sizeof(act_custom));
+    save();
+}
+
 unsigned grx_input_bit(int b) {
     return bits[b];
 }
 
-static const char *pad_name(int code) {
-    int xbox = grx_buttons_xbox();
+static const char *pad_name_as(int code, int xbox) {
     switch (code) {
     case SDL_GAMEPAD_BUTTON_SOUTH: return xbox ? "A" : "Cross";
     case SDL_GAMEPAD_BUTTON_EAST: return xbox ? "B" : "Circle";
@@ -100,6 +186,14 @@ static const char *pad_name(int code) {
     case SDL_GAMEPAD_BUTTON_TOUCHPAD: return "Touchpad";
     }
     return code == GRX_IN_NONE ? "-" : "Button";
+}
+
+static const char *pad_name(int code) {
+    return pad_name_as(code, grx_buttons_xbox());
+}
+
+const char *grx_input_name_ps2(int code) {
+    return pad_name_as(code, 0);
 }
 
 int grx_input_icon(int code) {
@@ -202,6 +296,22 @@ static void save(void) {
             fprintf(f, "%s = %s\n", ini_names[b], code_to_ini(kind, map[kind][b]));
         }
     }
+    {
+        int a, any = 0;
+        for (a = 0; a < GRX_ACT_COUNT; a++) {
+            for (kind = 0; kind < 2; kind++) {
+                if (!act_custom[kind][a]) {
+                    continue;
+                }
+                if (!any) {
+                    fputs("\n[port]\n", f);
+                    any = 1;
+                }
+                fprintf(f, "%s_%s = %s\n", act_ini[a], kind == GRX_IN_PAD ? "pad" : "key",
+                        code_to_ini(kind, act_map[kind][a]));
+            }
+        }
+    }
     grx_opts_ini_write(f);
     fclose(f);
 }
@@ -226,7 +336,7 @@ void grx_input_init(void) {
     const char *path = ini_path();
     FILE *f = fopen(path, "r");
     char line[256];
-    int kind = -1, b, video = 0;
+    int kind = -1, b, video = 0, port = 0;
     if (f == NULL) {
         return;
     }
@@ -238,6 +348,7 @@ void grx_input_init(void) {
         }
         if (*s == '[') {
             video = SDL_strncasecmp(s, "[video]", 7) == 0;
+            port = SDL_strncasecmp(s, "[port]", 6) == 0;
             kind = SDL_strncasecmp(s, "[controller]", 12) == 0 ? GRX_IN_PAD
                  : SDL_strncasecmp(s, "[keyboard]", 10) == 0 ? GRX_IN_KEY : -1;
             if (kind >= 0 && !custom[kind]) {
@@ -257,6 +368,27 @@ void grx_input_init(void) {
             if (!grx_opts_ini_read(s, trim(eq + 1))) {
                 grx_log("video: %s: \"%s = %s\" not understood", path, s, trim(eq + 1));
             }
+            continue;
+        }
+        if (port && eq != NULL) {
+            int a, k = -1;
+            *eq = 0;
+            s = trim(s);
+            for (a = 0; a < GRX_ACT_COUNT; a++) {
+                size_t n = strlen(act_ini[a]);
+                if (SDL_strncasecmp(s, act_ini[a], n) == 0 && s[n] == '_') {
+                    k = SDL_strcasecmp(s + n + 1, "pad") == 0 ? GRX_IN_PAD
+                      : SDL_strcasecmp(s + n + 1, "key") == 0 ? GRX_IN_KEY : -1;
+                    break;
+                }
+            }
+            code = k >= 0 ? ini_to_code(k, trim(eq + 1)) : -2;
+            if (code == -2) {
+                grx_log("controls: %s: \"%s = %s\" not understood", path, s, trim(eq + 1));
+                continue;
+            }
+            act_map[k][a] = code;
+            act_custom[k][a] = 1;
             continue;
         }
         if (kind < 0 || eq == NULL) {
@@ -310,13 +442,44 @@ void grx_input_capture(int kind) {
     cap_start = SDL_GetTicks();
 }
 
+int grx_input_capturing(void) {
+    return cap_state == 1 || cap_state == 2;
+}
+
 int grx_input_captured(void) {
     return cap_result;
 }
 
+/* The debug kit's keys (build.py --debug) */
+static int grx_debug_key(int key) {
+#ifdef GRX_DEBUG_KIT
+    return key == SDL_SCANCODE_HOME || key == SDL_SCANCODE_END || key == SDL_SCANCODE_F5 || key == SDL_SCANCODE_F6 ||
+           key == SDL_SCANCODE_F7 || key == SDL_SCANCODE_F12;
+#else
+    (void)key;
+    return 0;
+#endif
+}
+
+static int reserved_key(int key);
+
+int grx_input_key_ok(int key) {
+    return key > 0 && !reserved_key(key);
+}
+
+int grx_input_pad_ok(int code) {
+    int a;
+    for (a = 0; a < GRX_ACT_COUNT; a++) {
+        if (grx_action_get(GRX_IN_PAD, a) == code) {
+            return 0;
+        }
+    }
+    return code != GRX_IN_NONE;
+}
+
 /* The port's own keys are not for the game */
 static int reserved_key(int key) {
-    return key == SDL_SCANCODE_ESCAPE || key == SDL_SCANCODE_F9 || key == SDL_SCANCODE_F10 ||
+    return grx_action_for_key(key) >= 0 || key == SDL_SCANCODE_ESCAPE || key == SDL_SCANCODE_TAB || key == SDL_SCANCODE_F8 || grx_debug_key(key) || key == SDL_SCANCODE_F9 || key == SDL_SCANCODE_F10 ||
            key == SDL_SCANCODE_F11 || (key >= SDL_SCANCODE_F1 && key <= SDL_SCANCODE_F4);
 }
 

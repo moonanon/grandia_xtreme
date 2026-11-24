@@ -35,7 +35,9 @@
 s32 FldMenuWinTextAdd(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 #define ROWS 10         /* the game's 7 and the port's 3 */
-#define LIST_ROWS (GRX_IN_COUNT + 1) /* the buttons and "Use defaults" */
+#define ACT_ROW GRX_IN_COUNT /* the port's actions' first row (grx_input.h) */
+#define DEFAULTS_ROW (GRX_IN_COUNT + GRX_ACT_COUNT)
+#define LIST_ROWS (DEFAULTS_ROW + 1) /* the buttons, the port's actions and "Use defaults" */
 #define LIST_SHOWN 9    /* rows the list shows at once, three texts a row */
 #define LIST_Y 0x26     /* the list's first row in its window */
 #define LIST_H 0x16
@@ -176,9 +178,16 @@ static void ListDraw(s32 n, s32 capturing) {
     for (i = 0; i < LIST_SHOWN && list_top + i < LIST_ROWS; i++) {
         b = list_top + i;
         y = LIST_Y + i * LIST_H;
-        if (b == GRX_IN_COUNT) {
+        if (b == DEFAULTS_ROW) {
             name = "Use defaults";
             value = "";
+        } else if (b >= ACT_ROW) {
+            name = grx_action_label(b - ACT_ROW);
+            if (capturing && b == list_cursor) {
+                value = keys ? "Press a key" : "Press a button";
+            } else {
+                value = grx_input_name(list_kind, grx_action_get(list_kind, b - ACT_ROW));
+            }
         } else {
             name = does[b];
             if (capturing && b == list_cursor) {
@@ -193,12 +202,12 @@ static void ListDraw(s32 n, s32 capturing) {
         /* Icons instead of names where there are (FldMenuOptionsIconsDraw) */
         if (b < 8 && grx_buttons_ps_icon(b, &u, &v, &w)) {
             AddIcon(ICON_X, y, u, v, w, 16);
-        } else if (b < GRX_IN_COUNT) {
+        } else if (b < ACT_ROW) {
             TXT(9, ps_buttons[b], ICON_X, y, 0x14, n++, b == list_cursor ? 8 : 0);
         }
         icon = -1;
-        if (!keys && b < GRX_IN_COUNT && !(capturing && b == list_cursor)) {
-            icon = grx_input_icon(grx_input_get(GRX_IN_PAD, b));
+        if (!keys && b < DEFAULTS_ROW && !(capturing && b == list_cursor)) {
+            icon = grx_input_icon(b < ACT_ROW ? grx_input_get(GRX_IN_PAD, b) : grx_action_get(GRX_IN_PAD, b - ACT_ROW));
         }
         if (icon >= 0 && grx_buttons_icon(icon, &u, &v, &w)) {
             AddIcon(VALUE_X, y, u, v, w, 32);
@@ -234,8 +243,9 @@ static s32 ListUpdate(s32 n) {
     ListDraw(n, 0);
     if (trig & 0x20) {
         SndSePlay(0x7D2, 0, 0, 0x1E, 0);
-        if (list_cursor == GRX_IN_COUNT) {
+        if (list_cursor == DEFAULTS_ROW) {
             grx_input_reset(list_kind);
+            grx_action_reset();
         } else {
             grx_input_capture(list_kind);
             fldMenuOptions.state = 3;
@@ -258,6 +268,15 @@ static s32 ListCapture(s32 n) {
     ListDraw(n, got == -2);
     if (got == -1) {
         SndSePlay(0x7D3, 0, 0, 0x1E, 0);
+        fldMenuOptions.state = 2;
+    } else if (got >= 0 && list_cursor >= ACT_ROW) {
+        /* A port action: not on one of the game's buttons' inputs */
+        if (list_kind == GRX_IN_KEY ? grx_action_key_ok(got) : grx_action_pad_ok(got)) {
+            grx_action_set(list_kind, list_cursor - ACT_ROW, got);
+            SndSePlay(0x7D2, 0, 0, 0x1E, 0);
+        } else {
+            SndSePlay(0x7D3, 0, 0, 0x1E, 0);
+        }
         fldMenuOptions.state = 2;
     } else if (got >= 0) {
         grx_input_set(list_kind, list_cursor, got);

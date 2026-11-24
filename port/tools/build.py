@@ -12,10 +12,13 @@ build/port/gen/ with its inline asm translated to C (asm2c.py) and the few
 constructs clang rejects fixed (FIXUPS), then compiled; `#line` keeps
 errors pointing at the original file.
 
-Needs: clang from llvm-mingw (on PATH, in GRX_CLANG, or the winget
-install), asm/ from tools/split.sh (for the names of the functions still
-in assembly) and build/c_syms*.ld from the matching build (for the names
-the linker defines).
+Needs: clang from llvm-mingw (on PATH, in GRX_CLANG, the winget install
+or port/deps/), SDL3 (port/deps/ or GRX_SDL3), and what the matching
+build gives: the names its linker defines (build/c_syms*.ld), the labels
+still in assembly (asm/, from tools/split.sh) and some constants' bytes
+(its objects). Without the matching build these come from port/inputs/
+(port_inputs.py) and the game's own files in iso/; port/tools/build_all.py
+sets all of it up.
 """
 
 import argparse
@@ -152,13 +155,19 @@ HEADER_FIXUPS = {}
 # layer (port/tools/fixups/*.py, each with optional FIXUPS, HEADER_FIXUPS
 # and REPLACES like the ones above), so work on different areas doesn't
 # touch this file. A file's fixups from several modules apply in
-# module-name order.
+# module-name order. A module with DEBUG_ONLY = True (the debug kit,
+# fixups/devkit.py) is only loaded for --debug builds.
+DEBUG = "--debug" in sys.argv[1:]
+
+
 def _load_fixup_modules():
     import importlib.util
     for path in sorted(glob.glob(os.path.join(os.path.dirname(__file__), "fixups", "*.py"))):
         spec = importlib.util.spec_from_file_location("fixups_" + os.path.basename(path)[:-3], path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
+        if getattr(mod, "DEBUG_ONLY", False) and not DEBUG:
+            continue
         for rel, subs in getattr(mod, "FIXUPS", {}).items():
             FIXUPS.setdefault(rel, []).extend(subs)
         for rel, subs in getattr(mod, "HEADER_FIXUPS", {}).items():
@@ -200,9 +209,11 @@ def find_clang():
         return c
     pkgs = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WinGet\Packages")
     found = glob.glob(os.path.join(pkgs, "MartinStorsjo.LLVM-MinGW*", "llvm-mingw*", "bin", f"{TARGET}-clang.exe"))
+    # build_all.py unpacks a release there
+    found += sorted(glob.glob(os.path.join(ROOT, "port", "deps", "llvm-mingw-*", "bin", f"{TARGET}-clang.exe")))
     if found:
         return found[0]
-    sys.exit(f"clang for {TARGET} not found: install llvm-mingw "
+    sys.exit(f"clang for {TARGET} not found: run build.cmd, install llvm-mingw "
              "(winget install MartinStorsjo.LLVM-MinGW.UCRT) or set GRX_CLANG")
 
 
@@ -698,10 +709,16 @@ def main():
                          "list the globals each defines; safe to run several at once")
     ap.add_argument("--out", metavar="DIR",
                     help="build into DIR instead of build/port, so several full builds can run at once")
+    ap.add_argument("--debug", action="store_true",
+                    help="with the debug kit (F5-F7 keys, the debug list on screen; fixups/devkit.py), "
+                         "into the target's folder + '-debug'")
     args = ap.parse_args()
     set_target(args.target)
+    global OUT
+    if args.debug:
+        OUT += "-debug"
+        PORT_FLAGS.append("-DGRX_DEBUG_KIT")
     if args.out:
-        global OUT
         OUT = os.path.abspath(args.out)
     if args.check:
         sys.exit(check(args.check, args.opt))
@@ -863,7 +880,8 @@ def main():
             sys.exit(err)
         rsp = os.path.join(OUT, "link.rsp")
         with open(rsp, "w") as f:
-            f.write("\n".join(o.replace("\\", "/") for o in objs + [stub_obj, marks[1]]))
+            # Quoted: a path may have spaces in it
+            f.write("\n".join('"' + o.replace("\\", "/") + '"' for o in objs + [stub_obj, marks[1]]))
         if LINUX:
             exports = os.path.join(OUT, "exports.map")
             with open(exports, "w") as f:

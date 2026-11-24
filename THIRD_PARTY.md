@@ -423,3 +423,22 @@ is a judgement call: keep the notice with those 61 files.
 
 `port/third_party/xxhash/` is xxHash v0.8.3 by Yann Collet (BSD 2-Clause,
 license in the folder's header), used for PCSX2's texture replacement names.
+The port's own MPEG-2 decoder, `port/src/movie/mpeg2.c`, was written from
+ISO/IEC 13818-2, but its IDCT (`idct_row`, `idct_col`, `idct`) is
+`mpeg2decode`'s integer Chen-Wang IDCT (`idct.c`): the notice above applies
+to those functions.
+
+## The port's libraries
+
+The repository holds none of these; `build.cmd` downloads the first two
+into `port/deps/`, where each keeps its own license files.
+
+| Library | Used for | License |
+| --- | --- | --- |
+| [SDL3](https://github.com/libsdl-org/SDL) 3.4.18 | windows, OpenGL, audio, gamepads; `SDL3.dll` is copied next to `grandia.exe` | zlib |
+| [llvm-mingw](https://github.com/mstorsjo/llvm-mingw) 20261020 | the compiler and linker; `grandia.exe` links its runtime (mingw-w64, LLVM's compiler-rt) | Apache 2.0 with LLVM exceptions; mingw-w64's own (ZPL, public domain, and others) |
+| Python 3 | `build.cmd` and the build scripts | PSF |
+
+The decompilation's tools (splat, m2c, decomp-permuter, the EE GCC builds
+`tools/get_compilers.sh` fetches) are used only to build and check the
+decompilation; nothing of theirs goes into the port.

@@ -768,6 +768,22 @@ static char *run(char *line) {
         } else {
             status(&b);
         }
+    } else if (strcmp(argv[0], "key") == 0 && argc >= 2) {
+        /* A key press as the window gets it (SDL's scancode name: Escape,
+           Tab, Down, Return, M...), for the port's own keys and menu */
+        SDL_Scancode sc = SDL_GetScancodeFromName(argv[1]);
+        if (sc == SDL_SCANCODE_UNKNOWN) {
+            put(&b, "{\"ok\":false,\"error\":\"key NAME: an SDL scancode name (Escape, Tab, Down, Return, M)\"}");
+        } else {
+            SDL_Event ev;
+            SDL_zero(ev);
+            ev.type = SDL_EVENT_KEY_DOWN;
+            ev.key.scancode = sc;
+            ev.key.key = SDL_GetKeyFromScancode(sc, SDL_KMOD_NONE, false);
+            ev.key.down = true;
+            SDL_PushEvent(&ev);
+            status(&b);
+        }
     } else if (strcmp(argv[0], "state") == 0 && argc >= 3 && atoi(argv[2]) >= 1 && atoi(argv[2]) <= 4 &&
                (strcmp(argv[1], "save") == 0 || strcmp(argv[1], "load") == 0)) {
         /* A save state, as Shift+F1-F4 / F1-F4 (done at the next field

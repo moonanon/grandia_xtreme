@@ -7,6 +7,7 @@
 #include "save.h"
 #include "field/n18.h"
 #include "field/n25.h"
+#include "grx_mdt.h"
 
 /* Same layout as src/field/data/670470.c */
 typedef struct FldFlagListEntry {
@@ -38,6 +39,8 @@ void FldFlagListUpdate(void) {
     GphBatchQuad *q;
     TxtMsgHdr *msg;
     FldFlagListEntry *e;
+    s32 idx;
+    s32 len;
 
     __builtin_memcpy(ofs, fldFlagListShadowOfs, sizeof(ofs));
     if (fldFlagListWork->open == 0) {
@@ -96,10 +99,16 @@ void FldFlagListUpdate(void) {
         FldMenuWinClose(2, 0, 3);
         FldMenuCursorReset();
         fldFlagListWork->open = 0;
-        e = &fldFlagListEntries[fldFlagListWork->entries[fldFlagListWork->unk6 * 6 + fldFlagListWork->cursor]];
+        idx = fldFlagListWork->entries[fldFlagListWork->unk6 * 6 + fldFlagListWork->cursor];
         /* SysSaveData.unk1E40. Not through sysSaveData: the bss defines
-           evtMainFlag as its own object, which the port lays out on its own. */
-        (&evtMainFlag)[2] = e->value + 1;
+           evtMainFlag as its own object, which the port lays out on its own.
+           Entries past the game's 0x26 are mods/flaglist.txt's (grx_mdt.h). */
+        if (idx >= 0x26) {
+            (&evtMainFlag)[2] = grx_flaglist_value(idx - 0x26) + 1;
+        } else {
+            e = &fldFlagListEntries[idx];
+            (&evtMainFlag)[2] = e->value + 1;
+        }
         EvtScnrCall(fldFlagListWork->event);
         SndSePlay(0x7D2, 0, 0, 0x1E, 0);
         return;
@@ -116,7 +125,13 @@ void FldFlagListUpdate(void) {
         FldFlagListSetPage(fldFlagListWork->page);
     }
     for (i = 0; i < n; i++) {
-        str = strs[fldFlagListWork->entries[fldFlagListWork->unk6 * 6 + i]];
+        idx = fldFlagListWork->entries[fldFlagListWork->unk6 * 6 + i];
+        if (idx >= 0x26) {
+            str = grx_flaglist_glyphs(idx - 0x26, &len);
+        } else {
+            str = strs[idx];
+            len = lens[idx];
+        }
         if (i == fldFlagListWork->cursor) {
             b = 0x70;
             shR = 0x70;
@@ -129,7 +144,7 @@ void FldFlagListUpdate(void) {
             shB = 0x80;
         }
         x = 0x30;
-        for (j = 0; j < lens[fldFlagListWork->entries[fldFlagListWork->unk6 * 6 + i]]; j++) {
+        for (j = 0; j < len; j++) {
             if (j < 28) {
                 col = j;
                 row = 0;

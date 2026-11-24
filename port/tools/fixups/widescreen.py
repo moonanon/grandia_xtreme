@@ -73,11 +73,13 @@ FIXUPS = {
     ],
     # FldDraw: the mini-map's view (GphViewSetup(6, 32, 244, 180, 160, ...)
     # at the field's start) at the left edge, each frame (the aspect follows
-    # the window)
+    # the window); the whole picture while the map overlay is on
+    # (fixups/minimap.py)
     "src/field/5B06A0.c": [
         (r"\n(        FldSetDrawContext\(arg0, 1, 0\);\n        MapMiniDraw\(\);)",
-         r"\n        { void GphViewSetArea(s32, s32, s32, s32, s32); int grx_ws_hud_side(void);"
-         r" GphViewSetArea(6, 0x20 - grx_ws_hud_side(), 0xF4, 0xB4, 0xA0); }\1"),
+         r"\n        { void GphViewSetArea(s32, s32, s32, s32, s32); int grx_ws_hud_side(void); int grx_map_overlay(void);"
+         r" if (grx_map_overlay()) GphViewSetArea(6, 0, 0, 640, 448);"
+         r" else GphViewSetArea(6, 0x20 - grx_ws_hud_side(), 0xF4, 0xB4, 0xA0); }\1"),
     ],
     # BtlUnitInfoUpdate: the unit info window's place when it opens, and
     # while open

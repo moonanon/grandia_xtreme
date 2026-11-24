@@ -1,0 +1,2 @@
+# Batch files need CRLF, whatever the checkout or download
+*.cmd text eol=crlf

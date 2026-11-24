@@ -22,6 +22,30 @@ enum { GRX_IN_PAD, GRX_IN_KEY };
 #define GRX_IN_RT 101
 #define GRX_IN_NONE (-1)
 
+/* The port's own actions, each on one gamepad input and one key (the
+   defaults: fast forward on L3 and Tab, the minimap overlay on R3 and M),
+   set from the Esc menu (port/src/menu.c), kept in grandia.ini's [port] */
+enum { GRX_ACT_FAST_FORWARD, GRX_ACT_MAP_OVERLAY, GRX_ACT_COUNT };
+int grx_action_get(int kind, int a);
+void grx_action_set(int kind, int a, int code);
+void grx_action_reset(void);
+const char *grx_action_label(int a);
+/* Whether an action may go on a key (not one of the game's buttons', nor
+   Esc or F1-F12) or a gamepad input (not one of the game's buttons', but
+   for L3 and R3) */
+int grx_action_key_ok(int key);
+int grx_action_pad_ok(int code);
+/* Whether a game button may go on a key (not the port's own) or a gamepad
+   input (not a port action's) */
+int grx_input_key_ok(int key);
+int grx_input_pad_ok(int code);
+/* The action on key (an SDL_Scancode), or -1 */
+int grx_action_for_key(int key);
+/* Runs action a (the presenter's thread or the pads') */
+void grx_action_run(int a);
+/* A gamepad input's PS2 name (Cross, L3...), whatever the layout */
+const char *grx_input_name_ps2(int code);
+
 /* Once, before the pads: reads grandia.ini */
 void grx_input_init(void);
 
@@ -48,6 +72,8 @@ int grx_input_icon(int code);
    everything is let go after, the game sees nothing pressed. */
 void grx_input_capture(int kind);
 int grx_input_captured(void);
+/* 1 while the Configurations page waits for a key (Esc cancels it) */
+int grx_input_capturing(void);
 
 /* Puts game button b on `code`; a button that was on it gets b's old
    input, so every button keeps one. Saves grandia.ini. */
