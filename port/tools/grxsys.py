@@ -112,17 +112,19 @@ class Pack:
                 return n
         raise SystemExit("no free item id in %d-%d" % (lo, hi))
 
-    def add_item(self, like, lo, hi, name, kind, desc, price, mask, attack, bonus, help_desc_from):
+    def add_item(self, like, lo, hi, name, kind, desc, price, mask, attack, bonus):
         """A new equipment item: a copy of item `like`'s row (icon, model, rank)
         with its own name, help, equip record (attack, character mask, drop
-        rate bonus) and the drop-rate help of item `help_desc_from`"""
+        rate bonus) and a description of how much it raises the drop rate"""
         table = self.word(ITEM_TABLE)
         n = self.free_id(lo, hi)
         row = bytearray(self.data[self.item(like):self.item(like) + 32])
         struct.pack_into("<i", row, 4, price)
         struct.pack_into("<I", row, 0xC, self.append(text(name)) - table)
         struct.pack_into("<I", row, 0x10, self.append(help_text(kind, desc)) - table)
-        struct.pack_into("<I", row, 0x14, struct.unpack_from("<I", self.data, self.item(help_desc_from) + 0x14)[0])
+        word = "Slightly" if bonus <= 5 else "Moderately" if bonus <= 15 else "Greatly" if bonus <= 30 else "Massively"
+        lines = text(word + " increases ", b"\x00") + text("item drop rate", b"\x4d\xf9\x00") + b"\x00"
+        struct.pack_into("<I", row, 0x14, self.append(lines) - table)
         rec = bytearray(0x2C)
         struct.pack_into("<H", rec, 0, mask)
         struct.pack_into("<h", rec, 2, attack)
@@ -232,13 +234,13 @@ def thief_gear(p):
         assert name not in names or name == "Brigand's Sword" or name == "Corsair's Sword", name
         at, reqs, progress = p.find_shop(SHOP_WEAPONS, ref)
         price = struct.unpack_from("<i", p.data, p.item(ref) + 4)[0]
-        n = p.add_item(ref, lo, hi, name, "Weapon", desc, price, mask, round(p.attack(ref) * (1 - cut)), bonus, THIEF_SWORD)
+        n = p.add_item(ref, lo, hi, name, "Weapon", desc, price, mask, round(p.attack(ref) * (1 - cut)), bonus)
         p.set_shop(SHOP_WEAPONS, slot, n, reqs, progress)
         slot += 1
     slot = ACCESSORY_SLOTS
     for name, bonus, price, progress, mask, desc in RINGS:
         assert name not in names, name
-        n = p.add_item(RING_LIKE, 2001, 2047, name, "Item", desc, price, mask, 0, bonus, THIEF_SWORD)
+        n = p.add_item(RING_LIKE, 2001, 2047, name, "Item", desc, price, mask, 0, bonus)
         p.set_shop(SHOP_ACCESSORIES, slot, n, (0, 0, 0), progress)
         slot += 1
 
