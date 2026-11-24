@@ -6,6 +6,11 @@ before the tables' offsets are turned into pointers.
 """
 
 FIXUPS = {
+    # ItemShopEntryBuild: the third accessory shop also reads slots 80-95 of
+    # the list, where thief-gear's rings are (they are empty otherwise)
+    "src/field/5F2E38.c": [
+        (r"if \(arg6 >= 16 && arg6 <= 31\) \{", r"if ((arg6 >= 16 && arg6 <= 31) || (arg6 >= 80 && arg6 <= 95)) {"),
+    ],
     "src/main/41D1B8.c": [
         (r'(#include "common\.h"\n)', r'\1#include <stdint.h>\nuint32_t grx_grxsys_extra(void);\n'
                                       r'void grx_grxsys_patch(unsigned char *data, uint32_t size);\n#line 2\n'),

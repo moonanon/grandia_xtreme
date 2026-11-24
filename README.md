@@ -317,6 +317,7 @@ easier to come and go from, as the later ones already are.
 | `land-ruins-3-geo-gate` | Land Ruins 3's exit-only Geo Gate made two-way | `mdt/4050.mdp`-`4053.mdp` |
 | `aqua-ruins-geo-gate` | the Energy Conversion area's exit-only Geo Gate made two-way | `mdt/50F0.mdp`-`50F3.mdp` |
 | `gale-ruins-3-geo-gate` | a new Geo Gate deeper in Gale Ruins (map 0x5830) | `mdt/5830.mdp`-`5833.mdp` |
+| `thief-gear` | drop-rate gear so Titto isn't the only thief: Brigand's and Corsair's Swords (Evan, Brandol), Mercury Knife and Cacus Dagger (Lutina), Magpie / Plunder / Fortuna Rings (everyone but Titto), Mogay Rings (Titto); sold in the weapon and accessory shops. With the skill at level 5 Titto reaches 75 and the others 50 | `grxsys.grxp` |
 | `guaranteed-drops` | Pirate's Ring and Thief Trick give +20% a level, so at level 5 enemies always drop an item (and from the best items they have); the Pirate's Ring text no longer says "gold" | `grxsys.grxp` |
 | `map-overlay` | M (or R3) spreads the minimap flat over the whole field, as Final Fantasy XII's, while you keep walking | none: a line in `mods.txt` |
 | `minimap-entrances` | the minimap shows every map's entrances, and Geo Gates in cyan (the game shows them on the corridor floors only) | none: a line in `mods.txt` |

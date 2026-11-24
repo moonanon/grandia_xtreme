@@ -64,6 +64,9 @@ CODE_MODS = [
 
 # Mods that patch the system data (grxsys.py): one file, mods/grxsys.grxp
 GRXSYS_MODS = [
+    dict(mod="thief-gear",
+         desc="drop-rate gear so Titto isn't the only thief: swords for Evan and Brandol, daggers for Lutina, "
+              "rings for everyone (Titto's best, reaching 75 against the others' 50)"),
     dict(mod="guaranteed-drops",
          desc="Pirate's Ring and Thief Trick give +20% a level: at level 5 enemies always drop an item, "
               "and from the best items they have"),
