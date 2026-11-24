@@ -31,17 +31,17 @@ longer the only one.
 | Item | For | Drop rate | Where |
 | --- | --- | --- | --- |
 | Thief's Sword (the game's) | Evan, Brandol (was Brandol only) | +10 | reward, as before |
-| Brigand's Sword | Evan, Brandol | +15 | their weapon shops, mid-game |
-| Corsair's Sword | Evan, Brandol | +25 | their weapon shops, late-game |
+| Brigand's Sword | Evan, Brandol | +20 | their weapon shops, mid-game |
+| Corsair's Sword | Evan, Brandol | +30 | their weapon shops, late-game |
 | Laverna's Dagger (the game's) | Lutina | +10 | reward, as before |
-| Mercury Knife | Lutina | +15 | her weapon shop (same materials as the weapon it copies) |
-| Cacus Dagger | Lutina | +25 | her weapon shop (same) |
-| Magpie / Plunder / Fortuna Ring | everyone but Titto | +5 / +10 / +15 | accessory shop |
-| Mogay Ring / DX / Premium | Titto | +15 / +30 / +45 | accessory shop |
+| Mercury Knife | Lutina | +20 | her weapon shop (same materials as the weapon it copies) |
+| Cacus Dagger | Lutina | +30 | her weapon shop (same) |
+| Magpie / Plunder / Fortuna Ring | everyone but Titto | +10 / +15 / +20 | accessory shop |
+| Mogay Ring / DX / Premium | Titto | +20 / +45 / +70 | accessory shop |
 
 A new weapon's attack is that of the shop weapon it is modelled on, less 12%
-(+15) or 17% (+25): the drop rate costs attack. Add the Pirate's Ring skill's +10
-at level 5: Titto reaches 75, the others 50. The text says how much a piece
+(+20) or 17% (+30): the drop rate costs attack. Add the Pirate's Ring skill's +10
+at level 5: Titto, fully geared, reaches 100% (a sure drop), the others 60%. The text says how much a piece
 raises the drop rate (slightly, moderately, greatly, massively). Nothing else
 changes: Get Item, enemies and the skills are as they were, and Titto stays ahead.
 

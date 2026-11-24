@@ -122,7 +122,7 @@ class Pack:
         struct.pack_into("<i", row, 4, price)
         struct.pack_into("<I", row, 0xC, self.append(text(name)) - table)
         struct.pack_into("<I", row, 0x10, self.append(help_text(kind, desc)) - table)
-        word = "Slightly" if bonus <= 5 else "Moderately" if bonus <= 15 else "Greatly" if bonus <= 30 else "Massively"
+        word = "Slightly" if bonus <= 10 else "Moderately" if bonus <= 20 else "Greatly" if bonus <= 45 else "Massively"
         lines = text(word + " increases ", b"\x00") + text("item drop rate", b"\x4d\xf9\x00") + b"\x00"
         struct.pack_into("<I", row, 0x14, self.append(lines) - table)
         rec = bytearray(0x2C)
@@ -200,30 +200,30 @@ ACCESSORY_SLOTS = 80        # slots 80-95 of the accessory list: the shop that r
 # (a character's weapons are 100 ids from 701 + 100 * character) and the cut
 # in attack from the weapon it is cloned from, which is the price of the bonus
 WEAPONS = [
-    ("Brigand's Sword", 736, "Schiavona", +15, 0.12, EVAN_BRANDOL, (701, 800), "Bandit's keen blade"),
-    ("Corsair's Sword", 733, "Scramasax", +25, 0.17, EVAN_BRANDOL, (701, 800), "Pirate captain's saber"),
-    ("Brigand's Sword", 809, "Giant Broadsword", +15, 0.12, EVAN_BRANDOL, (801, 900), "Bandit's keen blade"),
-    ("Corsair's Sword", 830, "Jet-Black Sword", +25, 0.17, EVAN_BRANDOL, (801, 900), "Pirate captain's saber"),
-    ("Mercury Knife", 1405, "Double Moon", +15, 0.12, CHAR["lutina"], (1401, 1500), "Swift as the thief god"),
-    ("Cacus Dagger", 1403, "Orihalcon Dagger", +25, 0.17, CHAR["lutina"], (1401, 1500), "Cunning fire thief's blade"),
+    ("Brigand's Sword", 736, "Schiavona", +20, 0.12, EVAN_BRANDOL, (701, 800), "Bandit's keen blade"),
+    ("Corsair's Sword", 733, "Scramasax", +30, 0.17, EVAN_BRANDOL, (701, 800), "Pirate captain's saber"),
+    ("Brigand's Sword", 809, "Giant Broadsword", +20, 0.12, EVAN_BRANDOL, (801, 900), "Bandit's keen blade"),
+    ("Corsair's Sword", 830, "Jet-Black Sword", +30, 0.17, EVAN_BRANDOL, (801, 900), "Pirate captain's saber"),
+    ("Mercury Knife", 1405, "Double Moon", +20, 0.12, CHAR["lutina"], (1401, 1500), "Swift as the thief god"),
+    ("Cacus Dagger", 1403, "Orihalcon Dagger", +30, 0.17, CHAR["lutina"], (1401, 1500), "Cunning fire thief's blade"),
 ]
 
 # Rings (accessories): name, bonus, price, scenario progress when sold, character mask, text
 RINGS = [
-    ("Magpie Ring", +5, 1200, 0, EVERYONE_BUT_TITTO, "Loves shiny things"),
-    ("Plunder Ring", +10, 6000, 13100, EVERYONE_BUT_TITTO, "Takes what it can"),
-    ("Fortuna Ring", +15, 12000, 14750, EVERYONE_BUT_TITTO, "Luck favors thieves"),
-    ("Mogay Ring", +15, 2000, 11300, CHAR["titto"], "Rabbits' thieving charm"),
-    ("Mogay Ring DX", +30, 8000, 13100, CHAR["titto"], "Rabbits' finest swag"),
-    ("Mogay Ring Premium", +45, 16000, 14750, CHAR["titto"], "Rabbit king's loot"),
+    ("Magpie Ring", +10, 1200, 0, EVERYONE_BUT_TITTO, "Loves shiny things"),
+    ("Plunder Ring", +15, 6000, 13100, EVERYONE_BUT_TITTO, "Takes what it can"),
+    ("Fortuna Ring", +20, 12000, 14750, EVERYONE_BUT_TITTO, "Luck favors thieves"),
+    ("Mogay Ring", +20, 2000, 11300, CHAR["titto"], "Rabbits' thieving charm"),
+    ("Mogay Ring DX", +45, 8000, 13100, CHAR["titto"], "Rabbits' finest swag"),
+    ("Mogay Ring Premium", +70, 16000, 14750, CHAR["titto"], "Rabbit king's loot"),
 ]
 RING_LIKE = 1938            # Heal Ring: the ring icon and rank
 
 
 def thief_gear(p):
     """Drop-rate gear for the thieves, so Titto isn't the only one (his total
-    is 75 with the skill at level 5, +20 Mogay Suit DX and a Mogay Ring; the
-    others reach 50): swords and daggers for Evan, Brandol and Lutina, rings
+    is 100 with the skill at level 5, +20 Mogay Suit DX and the best Mogay Ring: a
+    sure drop; the others reach 60): swords and daggers for Evan, Brandol and Lutina, rings
     for everyone, sold in the shops at the late tiers"""
     names = {p.item_name(n) for n in range(0x800) if p.data[p.item(n)]}
     p.data[p.equip(THIEF_SWORD)] |= EVAN_BRANDOL
