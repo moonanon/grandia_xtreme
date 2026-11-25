@@ -224,7 +224,7 @@ RINGS = [
 RING_LIKE = 1938            # Heal Ring: the ring icon and rank
 
 
-def thief_gear(p):
+def item_gear(p):
     """Drop-rate gear for the thieves, so Titto isn't the only one (his total
     is 100 with the skill at level 5, +20 Mogay Suit DX and the best Mogay Ring: a
     sure drop; the others reach 60): swords and daggers for Evan, Brandol and Lutina, rings
@@ -260,18 +260,18 @@ ARMORS = [
     ("Lupin's Vest", 1511, "Dark Armor", +30, 0.17, "Gentleman thief's vest"),
 ]
 
-# Gold rings, for everyone, priced and sold as thief-gear's rings: name, bonus,
+# Gold rings, for everyone, priced and sold as the drop-rate rings: name, bonus,
 # price, scenario progress when sold, text
 GOLD_RINGS = [
     ("Cutpurse Ring", +10, 1200, 0, "Ring of a nimble cutpurse"),
     ("Mugger's Ring", +15, 6000, 13100, "Ring of a back-alley robber"),
     ("Lupin's Ring", +20, 12000, 14750, "Ring of a gentleman thief"),
 ]
-GOLD_RING_SLOTS = 86        # after thief-gear's six, within slots 80-95
-GOLD_RING_IDS = (2021, 2047)  # clear of thief-gear's, so a save's rings stay the same with or without it
+GOLD_RING_SLOTS = 86        # after the six drop-rate rings, within slots 80-95
+GOLD_RING_IDS = (2021, 2047)  # apart from the drop-rate rings', leaving them room
 
 
-def bandit_gear(p):
+def gold_gear(p):
     """Gold-rate body armor above the game's Bandit Armor, for the same six, and
     rings for everyone: the killer's bonus raises the chance of the enemy's large
     gold payout"""
@@ -297,7 +297,14 @@ def bandit_gear(p):
         slot += 1
 
 
-MODS = {"guaranteed-drops": pirate_ring_100, "thief-gear": thief_gear, "bandit-gear": bandit_gear}
+def thief_gear(p):
+    """Both gear lines: item drop rate, then gold. The order fixes the new
+    items' ids, which saves hold"""
+    item_gear(p)
+    gold_gear(p)
+
+
+MODS = {"guaranteed-drops": pirate_ring_100, "thief-gear": thief_gear}
 
 
 def build(iso, names, out):

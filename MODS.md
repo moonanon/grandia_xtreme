@@ -19,14 +19,19 @@ change; their numbers are the tables at the top of `port/tools/grxsys.py`.
 `thief-gear` and `guaranteed-drops` are two takes on the same problem: only
 Titto's Get Item steals reliably. **Use one or the other.** They can be built
 together, but it makes no sense: `guaranteed-drops` already drops everything, so
-the gear's bonus is wasted, and the gear is what keeps Titto from being made
-pointless.
+the item gear's bonus is wasted, and the item gear is what keeps Titto from being
+made pointless.
 
 ### `thief-gear` (the vanilla take)
 
 The more vanilla, "canon" take: it keeps the game's own rules and scale and
 gives the other characters thief gear, so Titto is still the thief, only no
-longer the only one.
+longer the only one. It has two lines, one for items and one for gold. Only the
+**killer's** bonuses count for either. Get Item, enemies and the skills are as
+they were. A piece's text says how much it raises its rate (slightly,
+moderately, greatly, massively).
+
+#### Item line
 
 | Item | For | Drop rate | Where |
 | --- | --- | --- | --- |
@@ -41,9 +46,38 @@ longer the only one.
 
 A new weapon's attack is that of the shop weapon it is modelled on, less 12%
 (+20) or 17% (+30): the drop rate costs attack. Add the Pirate's Ring skill's +10
-at level 5: Titto, fully geared, reaches 100% (a sure drop), the others 60%. The text says how much a piece
-raises the drop rate (slightly, moderately, greatly, massively). Nothing else
-changes: Get Item, enemies and the skills are as they were, and Titto stays ahead.
+at level 5: Titto, fully geared, reaches 100% (a sure drop), the others 60%.
+
+#### Gold line
+
+When an enemy drops gold, it is its small payout or its large one (three times
+the small, on those that have both). Gold gear raises the chance of the large
+one. It doesn't change the amounts. Enemies with only one payout, many bosses
+among them, are unaffected.
+
+| Item | For | Gold bonus | Where |
+| --- | --- | --- | --- |
+| Bandit Armor (the game's) | Evan, Brandol, Carmyne, Titto, Ulk, Lutina | +10 | not sold |
+| Highwayman's Garb | the same six | +20 | armor shop, with Aura Armor (9200) |
+| Lupin's Vest | the same six | +30 | armor shop, with Dark Armor (20000) |
+| Cutpurse / Mugger's / Lupin's Ring | everyone | +10 / +15 / +20 | accessory shop (1200 / 6000 / 12000) |
+
+New armor's defense is that of the shop armor it is modelled on, less 12%
+(Highwayman's Garb, 56) or 17% (Lupin's Vest, 73), and it keeps none of that
+armor's other bonuses or effects.
+
+The gold bonuses stack, with the game's Geo Blade (Evan), Miser Turban and the
+gold skill (+2 a level). Lupin's Vest, Lupin's Ring and the skill at level 5
+give +60; the Miser Turban and Geo Blade add +10 each for those who can wear
+them.
+
+#### Items or gold
+
+An enemy that drops its item gives no gold, and the game uses one roll for both:
+item-rate gear takes the high rolls that would have given large gold, so on an
+enemy with an item, enough of it cancels the gold bonus. Gold gear never lowers
+the item chance. A character has one accessory slot, so a gold ring and an item
+ring can't both be worn.
 
 ### `guaranteed-drops` (the hard take)
 
@@ -57,43 +91,6 @@ said "more gold", though it raises the item chance; it now says what it does.
 No gear is added: anyone can learn the skills.
 
 An enemy that rolled no item at the start of the battle still drops nothing.
-
-## `bandit-gear`
-
-The gold line, beside `thief-gear`'s item line; either works without the other.
-When an enemy drops gold, it is its small payout or its large one (three times
-the small, on those that have both). Gold gear raises the chance of the large
-one by the **killer's** bonus. It doesn't change the amounts, and an enemy that
-drops its item gives no gold. Enemies with only one payout, many bosses among
-them, are unaffected.
-
-| Armor | Gold bonus | Defense | Price | Where |
-| --- | --- | --- | --- | --- |
-| Bandit Armor (the game's) | +10 | 18 | | not sold |
-| Highwayman's Garb | +20 | 56 (Aura Armor's 64, less 12%) | 9200 | armor shop, with Aura Armor |
-| Lupin's Vest | +30 | 73 (Dark Armor's 88, less 17%) | 20000 | armor shop, with Dark Armor |
-
-Evan, Brandol, Carmyne, Titto, Ulk and Lutina can wear the armor, as Bandit
-Armor. The new armor keeps none of the copied armor's other bonuses or effects.
-
-| Ring (everyone) | Gold bonus | Price |
-| --- | --- | --- |
-| Cutpurse Ring | +10 | 1200 |
-| Mugger's Ring | +15 | 6000 |
-| Lupin's Ring | +20 | 12000 |
-
-The rings are in the accessory shop, at the same stages as `thief-gear`'s. A
-character has one accessory slot, so a gold ring and a thief ring can't both be
-worn.
-
-All of it stacks, with the game's Geo Blade and Miser Turban (+10 each) and the
-gold skill (+2 a level). Lupin's Vest, Lupin's Ring and the skill at level 5
-give +60, as `thief-gear`'s best does for items. Evan, with the Geo Blade and
-Miser Turban too, gets +80.
-
-The game uses one roll for both drops, so item-rate gear takes the high rolls
-that would have given large gold: on an enemy with an item, enough of it cancels
-the gold bonus. Gold gear never lowers the item chance.
 
 ## Geo Gates and the map
 
