@@ -214,9 +214,9 @@ WEAPONS = [
 
 # Rings (accessories): name, bonus, price, scenario progress when sold, character mask, text
 RINGS = [
-    ("Magpie Ring", +10, 1200, 0, EVERYONE_BUT_TITTO, "Loves shiny things"),
-    ("Plunder Ring", +15, 6000, 13100, EVERYONE_BUT_TITTO, "Takes what it can"),
-    ("Fortuna Ring", +20, 12000, 14750, EVERYONE_BUT_TITTO, "Luck favors thieves"),
+    ("Magpie Ring", +10, 1200, 0, EVERYONE_BUT_TITTO, "Attracts shiny things"),
+    ("Plunder Ring", +15, 6000, 13100, EVERYONE_BUT_TITTO, "Ring taken as plunder"),
+    ("Fortuna Ring", +20, 12000, 14750, EVERYONE_BUT_TITTO, "Blessed by goddess of luck"),
     ("Mogay Ring", +20, 2000, 11300, CHAR["titto"], "Rabbits' thieving charm"),
     ("Mogay Ring DX", +45, 8000, 13100, CHAR["titto"], "Rabbits' finest swag"),
     ("Mogay Ring Premium", +70, 16000, 14750, CHAR["titto"], "Rabbit king's loot"),
@@ -256,16 +256,16 @@ SHOP_ARMOR = 1
 # its requirements, its shop and when it is sold), the bonus, the cut in
 # defense, which is the price of the bonus, and the description
 ARMORS = [
-    ("Highwayman's Garb", 1514, "Aura Armor", +20, 0.12, "Stand and deliver"),
+    ("Highwayman's Garb", 1514, "Aura Armor", +20, 0.12, "Garb of a highway robber"),
     ("Lupin's Vest", 1511, "Dark Armor", +30, 0.17, "Gentleman thief's vest"),
 ]
 
 # Gold rings, for everyone, priced and sold as thief-gear's rings: name, bonus,
 # price, scenario progress when sold, text
 GOLD_RINGS = [
-    ("Cutpurse Ring", +10, 1200, 0, "A quick hand for coins"),
-    ("Turpin's Ring", +15, 6000, 13100, "Your money or your life"),
-    ("Lupin's Ring", +20, 12000, 14750, "Only the finest loot"),
+    ("Cutpurse Ring", +10, 1200, 0, "Ring of a nimble cutpurse"),
+    ("Mugger's Ring", +15, 6000, 13100, "Ring of a back-alley robber"),
+    ("Lupin's Ring", +20, 12000, 14750, "Ring of a gentleman thief"),
 ]
 GOLD_RING_SLOTS = 86        # after thief-gear's six, within slots 80-95
 GOLD_RING_IDS = (2021, 2047)  # clear of thief-gear's, so a save's rings stay the same with or without it

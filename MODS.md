@@ -79,7 +79,7 @@ Armor. The new armor keeps none of the copied armor's other bonuses or effects.
 | Ring (everyone) | Gold bonus | Price |
 | --- | --- | --- |
 | Cutpurse Ring | +10 | 1200 |
-| Turpin's Ring | +15 | 6000 |
+| Mugger's Ring | +15 | 6000 |
 | Lupin's Ring | +20 | 12000 |
 
 The rings are in the accessory shop, at the same stages as `thief-gear`'s. A
