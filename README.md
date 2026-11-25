@@ -314,6 +314,7 @@ easier to come and go from, as the later ones already are.
 | Mod | What it does |
 | --- | --- |
 | `thief-gear` | drop-rate gear for Evan, Brandol and Lutina and rings for all, so Titto isn't the only thief (the vanilla take) |
+| `bandit-gear` | gold-rate body armor above the game's Bandit Armor, for a better chance of large gold payouts |
 | `guaranteed-drops` | Pirate's Ring and Thief Trick give +20% a level: at level 5 enemies always drop an item (the hard take) |
 | `land-ruins-2-geo-gate`, `land-ruins-3-geo-gate`, `aqua-ruins-geo-gate`, `gale-ruins-3-geo-gate` | new and two-way Geo Gates |
 | `map-overlay` | M (or R3) spreads the minimap flat over the whole field |

@@ -58,6 +58,29 @@ No gear is added: anyone can learn the skills.
 
 An enemy that rolled no item at the start of the battle still drops nothing.
 
+## `bandit-gear`
+
+The gold line, beside `thief-gear`'s item line; either works without the other.
+When an enemy drops gold, it is its small payout or its large one (three times
+the small, on those that have both). Gold gear raises the chance of the large
+one by the **killer's** bonus. It doesn't change the amounts, and an enemy that
+drops its item gives no gold. Enemies with only one payout, many bosses among
+them, are unaffected.
+
+| Armor | Gold bonus | Defense | Price | Where |
+| --- | --- | --- | --- | --- |
+| Bandit Armor (the game's) | +10 | 18 | | not sold |
+| Highwayman's Garb | +20 | 56 (Aura Armor's 64, less 12%) | 9200 | armor shop, with Aura Armor |
+| Lupin's Vest | +30 | 73 (Dark Armor's 88, less 17%) | 20000 | armor shop, with Dark Armor |
+
+Evan, Brandol, Carmyne, Titto, Ulk and Lutina can wear them, as Bandit Armor.
+The new pieces keep none of the copied armor's other bonuses or effects. They
+stack with the game's Geo Blade and Miser Turban (+10 each).
+
+The game uses one roll for both drops, so item-rate gear takes the high rolls
+that would have given large gold: on an enemy with an item, enough of it cancels
+the gold bonus. Gold gear never lowers the item chance.
+
 ## Geo Gates and the map
 
 | Mod | What it does |
