@@ -92,6 +92,13 @@ No gear is added: anyone can learn the skills.
 
 An enemy that rolled no item at the start of the battle still drops nothing.
 
+## `pirates-ring-text`
+
+A text fix, with no change to the rules: the game says Pirate's Ring makes an
+enemy drop "more gold", but it raises the chance of the item. It now says "more
+items". The gold skill with the same text is right and keeps it. It works with
+either thief mod.
+
 ## Geo Gates and the map
 
 | Mod | What it does |

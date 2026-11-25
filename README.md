@@ -314,6 +314,7 @@ easier to come and go from, as the later ones already are.
 | Mod | What it does |
 | --- | --- |
 | `thief-gear` | two gear lines: item drop rate (weapons and rings) and gold (armor and rings), so Titto isn't the only thief (the vanilla take) |
+| `pirates-ring-text` | Pirate's Ring's description says "more items", which is what it does, instead of "more gold" |
 | `guaranteed-drops` | Pirate's Ring and Thief Trick give +20% a level: at level 5 enemies always drop an item (the hard take) |
 | `land-ruins-2-geo-gate`, `land-ruins-3-geo-gate`, `aqua-ruins-geo-gate`, `gale-ruins-3-geo-gate` | new and two-way Geo Gates |
 | `map-overlay` | M (or R3) spreads the minimap flat over the whole field |

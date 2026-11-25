@@ -193,6 +193,16 @@ def pirate_ring_100(p):
 
 
 
+def pirate_ring_text(p):
+    """Pirate's Ring's description says "more gold", but its effect is the item
+    drop rate. The level line follows the skill's amount, so with
+    guaranteed-drops it keeps that mod's numbers (it must run after it)"""
+    s = p.skill(PIRATES_RING)
+    assert p.data[s + 8] == EFFECT_DROP_RATE, "skill %d isn't as read" % PIRATES_RING
+    p.set_skill_text(PIRATES_RING, ["Enemy may drop ", "more items", "Only if enemy's defeated",
+                                    "Level X %d%%" % p.s16(s + SKILL_AMOUNT)])
+
+
 THIEF_SWORD = 840           # Thief's Sword (Brandol's, +10), widened to Evan too
 EVAN_BRANDOL = CHAR["evan"] | CHAR["brandol"]
 EVERYONE_BUT_TITTO = 0xFF & ~CHAR["titto"]
@@ -304,7 +314,7 @@ def thief_gear(p):
     gold_gear(p)
 
 
-MODS = {"guaranteed-drops": pirate_ring_100, "thief-gear": thief_gear}
+MODS = {"guaranteed-drops": pirate_ring_100, "thief-gear": thief_gear, "pirates-ring-text": pirate_ring_text}
 
 
 def build(iso, names, out):

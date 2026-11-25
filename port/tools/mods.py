@@ -70,6 +70,9 @@ GRXSYS_MODS = [
     dict(mod="guaranteed-drops",
          desc="Pirate's Ring and Thief Trick give +20% a level: at level 5 enemies always drop an item, "
               "and from the best items they have"),
+    # after guaranteed-drops: its level line reads the skill's amount
+    dict(mod="pirates-ring-text",
+         desc="Pirate's Ring's description says it drops more items, as it does, not more gold"),
 ]
 
 TEMPLATE_MAP = 0x5020
