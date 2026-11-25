@@ -28,7 +28,7 @@ SHOP_TABLE = 0xA0    # header word: 3 shop lists of 150 x 10 bytes (id, 3 requir
 SHOP_LIST = 1500
 EFFECT_DROP_RATE = 0x75
 EFFECT_GOLD_RATE = 0xA8   # chance the gold dropped is the enemy's large payout
-EFFECT_TEXT = {EFFECT_DROP_RATE: "item drop rate", EFFECT_GOLD_RATE: "large gold chance"}
+EFFECT_TEXT = {EFFECT_DROP_RATE: "item drop rate", EFFECT_GOLD_RATE: "chance of more gold"}
 CHAR = dict(evan=0x01, brandol=0x02, carmyne=0x04, jaid=0x08, titto=0x10, ulk=0x20, myamm=0x40, lutina=0x80)
 
 PIRATES_RING = 26
@@ -114,6 +114,12 @@ class Pack:
                 return n
         raise SystemExit("no free item id in %d-%d" % (lo, hi))
 
+    def set_bonus_text(self, row, bonus, effect):
+        """An item row's description of its bonus: how much, and what it raises"""
+        word = "Slightly" if bonus <= 10 else "Moderately" if bonus <= 20 else "Greatly" if bonus <= 45 else "Massively"
+        lines = text(word + " increases ", b"\x00") + text(EFFECT_TEXT[effect], b"\x4d\xf9\x00") + b"\x00"
+        struct.pack_into("<I", row, 0x14, self.append(lines) - self.word(ITEM_TABLE))
+
     def add_item(self, like, lo, hi, name, kind, desc, price, mask, attack, bonus,
                  defense=0, effect=EFFECT_DROP_RATE):
         """A new equipment item: a copy of item `like`'s row (icon, model, rank)
@@ -125,9 +131,7 @@ class Pack:
         struct.pack_into("<i", row, 4, price)
         struct.pack_into("<I", row, 0xC, self.append(text(name)) - table)
         struct.pack_into("<I", row, 0x10, self.append(help_text(kind, desc)) - table)
-        word = "Slightly" if bonus <= 10 else "Moderately" if bonus <= 20 else "Greatly" if bonus <= 45 else "Massively"
-        lines = text(word + " increases ", b"\x00") + text(EFFECT_TEXT[effect], b"\x4d\xf9\x00") + b"\x00"
-        struct.pack_into("<I", row, 0x14, self.append(lines) - table)
+        self.set_bonus_text(row, bonus, effect)
         rec = bytearray(0x2C)
         struct.pack_into("<H", rec, 0, mask)
         struct.pack_into("<h", rec, 2, attack)
@@ -258,6 +262,7 @@ def item_gear(p):
         p.set_shop(SHOP_ACCESSORIES, slot, n, (0, 0, 0), progress)
         slot += 1
 
+GAME_GOLD_GEAR = (752, 1573, 1832)  # Geo Blade, Bandit Armor, Miser Turban (+10 each)
 BANDIT_ARMOR = 1573         # the game's own (+10 gold), whose wearers the new armor copies
 BANDIT_WEARERS = sum(CHAR[c] for c in ("evan", "brandol", "carmyne", "titto", "ulk", "lutina"))
 SHOP_ARMOR = 1
@@ -287,6 +292,12 @@ def gold_gear(p):
     gold payout"""
     e = p.equip(BANDIT_ARMOR)
     assert p.data[e] == BANDIT_WEARERS and p.data[e + 0x15] == EFFECT_GOLD_RATE and p.s16(e + 0x16) == 10
+    for n in GAME_GOLD_GEAR:   # their text, as the new gold gear's
+        e = p.equip(n)
+        assert p.data[e + 0x15] == EFFECT_GOLD_RATE and p.s16(e + 0x16) == 10, "item %d isn't as read" % n
+        row = bytearray(p.data[p.item(n):p.item(n) + 32])
+        p.set_bonus_text(row, 10, EFFECT_GOLD_RATE)
+        p.data[p.item(n):p.item(n) + 32] = row
     names = {p.item_name(n) for n in range(0x800) if p.data[p.item(n)]}
     slot = 128
     for name, ref, ref_name, bonus, cut, desc in ARMORS:

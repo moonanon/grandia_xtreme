@@ -66,6 +66,10 @@ New armor's defense is that of the shop armor it is modelled on, less 12%
 (Highwayman's Garb, 56) or 17% (Lupin's Vest, 73), and it keeps none of that
 armor's other bonuses or effects.
 
+All gold gear, the game's three included (Geo Blade, Bandit Armor, Miser
+Turban), says how much it raises the "chance of more gold", in place of the
+game's "Enemy drops more gold when defeated".
+
 The gold bonuses stack, with the game's Geo Blade (Evan), Miser Turban and the
 gold skill (+2 a level). Lupin's Vest, Lupin's Ring and the skill at level 5
 give +60; the Miser Turban and Geo Blade add +10 each for those who can wear
