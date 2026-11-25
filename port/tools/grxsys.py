@@ -27,6 +27,8 @@ SORT_KEYS = 0x88     # header word: u16 per item
 SHOP_TABLE = 0xA0    # header word: 3 shop lists of 150 x 10 bytes (id, 3 required items, scenario progress)
 SHOP_LIST = 1500
 EFFECT_DROP_RATE = 0x75
+EFFECT_GOLD_RATE = 0xA8   # chance the gold dropped is the enemy's large payout
+EFFECT_TEXT = {EFFECT_DROP_RATE: "item drop rate", EFFECT_GOLD_RATE: "chance of more gold"}
 CHAR = dict(evan=0x01, brandol=0x02, carmyne=0x04, jaid=0x08, titto=0x10, ulk=0x20, myamm=0x40, lutina=0x80)
 
 PIRATES_RING = 26
@@ -112,23 +114,29 @@ class Pack:
                 return n
         raise SystemExit("no free item id in %d-%d" % (lo, hi))
 
-    def add_item(self, like, lo, hi, name, kind, desc, price, mask, attack, bonus):
+    def set_bonus_text(self, row, bonus, effect):
+        """An item row's description of its bonus: how much, and what it raises"""
+        word = "Slightly" if bonus <= 10 else "Moderately" if bonus <= 20 else "Greatly" if bonus <= 45 else "Massively"
+        lines = text(word + " increases ", b"\x00") + text(EFFECT_TEXT[effect], b"\x4d\xf9\x00") + b"\x00"
+        struct.pack_into("<I", row, 0x14, self.append(lines) - self.word(ITEM_TABLE))
+
+    def add_item(self, like, lo, hi, name, kind, desc, price, mask, attack, bonus,
+                 defense=0, effect=EFFECT_DROP_RATE):
         """A new equipment item: a copy of item `like`'s row (icon, model, rank)
-        with its own name, help, equip record (attack, character mask, drop
-        rate bonus) and a description of how much it raises the drop rate"""
+        with its own name, help, equip record (attack, defense, character mask,
+        drop or gold rate bonus) and a description of how much it raises it"""
         table = self.word(ITEM_TABLE)
         n = self.free_id(lo, hi)
         row = bytearray(self.data[self.item(like):self.item(like) + 32])
         struct.pack_into("<i", row, 4, price)
         struct.pack_into("<I", row, 0xC, self.append(text(name)) - table)
         struct.pack_into("<I", row, 0x10, self.append(help_text(kind, desc)) - table)
-        word = "Slightly" if bonus <= 10 else "Moderately" if bonus <= 20 else "Greatly" if bonus <= 45 else "Massively"
-        lines = text(word + " increases ", b"\x00") + text("item drop rate", b"\x4d\xf9\x00") + b"\x00"
-        struct.pack_into("<I", row, 0x14, self.append(lines) - table)
+        self.set_bonus_text(row, bonus, effect)
         rec = bytearray(0x2C)
         struct.pack_into("<H", rec, 0, mask)
         struct.pack_into("<h", rec, 2, attack)
-        rec[0x15] = EFFECT_DROP_RATE
+        struct.pack_into("<h", rec, 4, defense)
+        rec[0x15] = effect
         struct.pack_into("<h", rec, 0x16, bonus)
         struct.pack_into("<I", row, 0x18, self.append(bytes(rec)) - table)
         struct.pack_into("<I", row, 0x1C, 0)
@@ -189,6 +197,16 @@ def pirate_ring_100(p):
 
 
 
+def pirate_ring_text(p):
+    """Pirate's Ring's description says "more gold", but its effect is the item
+    drop rate. The level line follows the skill's amount, so with
+    guaranteed-drops it keeps that mod's numbers (it must run after it)"""
+    s = p.skill(PIRATES_RING)
+    assert p.data[s + 8] == EFFECT_DROP_RATE, "skill %d isn't as read" % PIRATES_RING
+    p.set_skill_text(PIRATES_RING, ["Enemy may drop ", "more items", "Only if enemy's defeated",
+                                    "Level X %d%%" % p.s16(s + SKILL_AMOUNT)])
+
+
 THIEF_SWORD = 840           # Thief's Sword (Brandol's, +10), widened to Evan too
 EVAN_BRANDOL = CHAR["evan"] | CHAR["brandol"]
 EVERYONE_BUT_TITTO = 0xFF & ~CHAR["titto"]
@@ -200,9 +218,9 @@ ACCESSORY_SLOTS = 80        # slots 80-95 of the accessory list: the shop that r
 # (a character's weapons are 100 ids from 701 + 100 * character) and the cut
 # in attack from the weapon it is cloned from, which is the price of the bonus
 WEAPONS = [
-    ("Brigand's Sword", 736, "Schiavona", +20, 0.12, EVAN_BRANDOL, (701, 800), "Bandit's keen blade"),
+    ("Brigand's Sword", 736, "Schiavona", +20, 0.12, EVAN_BRANDOL, (701, 800), "Raider's keen blade"),
     ("Corsair's Sword", 733, "Scramasax", +30, 0.17, EVAN_BRANDOL, (701, 800), "Pirate captain's saber"),
-    ("Brigand's Sword", 809, "Giant Broadsword", +20, 0.12, EVAN_BRANDOL, (801, 900), "Bandit's keen blade"),
+    ("Brigand's Sword", 809, "Giant Broadsword", +20, 0.12, EVAN_BRANDOL, (801, 900), "Raider's keen blade"),
     ("Corsair's Sword", 830, "Jet-Black Sword", +30, 0.17, EVAN_BRANDOL, (801, 900), "Pirate captain's saber"),
     ("Mercury Knife", 1405, "Double Moon", +20, 0.12, CHAR["lutina"], (1401, 1500), "Swift as the thief god"),
     ("Cacus Dagger", 1403, "Orihalcon Dagger", +30, 0.17, CHAR["lutina"], (1401, 1500), "Cunning fire thief's blade"),
@@ -210,9 +228,9 @@ WEAPONS = [
 
 # Rings (accessories): name, bonus, price, scenario progress when sold, character mask, text
 RINGS = [
-    ("Magpie Ring", +10, 1200, 0, EVERYONE_BUT_TITTO, "Loves shiny things"),
-    ("Plunder Ring", +15, 6000, 13100, EVERYONE_BUT_TITTO, "Takes what it can"),
-    ("Fortuna Ring", +20, 12000, 14750, EVERYONE_BUT_TITTO, "Luck favors thieves"),
+    ("Magpie Ring", +10, 1200, 0, EVERYONE_BUT_TITTO, "Attracts shiny things"),
+    ("Plunder Ring", +15, 6000, 13100, EVERYONE_BUT_TITTO, "Ring taken as plunder"),
+    ("Fortuna Ring", +20, 12000, 14750, EVERYONE_BUT_TITTO, "Blessed by goddess of luck"),
     ("Mogay Ring", +20, 2000, 11300, CHAR["titto"], "Rabbits' thieving charm"),
     ("Mogay Ring DX", +45, 8000, 13100, CHAR["titto"], "Rabbits' finest swag"),
     ("Mogay Ring Premium", +70, 16000, 14750, CHAR["titto"], "Rabbit king's loot"),
@@ -220,7 +238,7 @@ RINGS = [
 RING_LIKE = 1938            # Heal Ring: the ring icon and rank
 
 
-def thief_gear(p):
+def item_gear(p):
     """Drop-rate gear for the thieves, so Titto isn't the only one (his total
     is 100 with the skill at level 5, +20 Mogay Suit DX and the best Mogay Ring: a
     sure drop; the others reach 60): swords and daggers for Evan, Brandol and Lutina, rings
@@ -244,7 +262,70 @@ def thief_gear(p):
         p.set_shop(SHOP_ACCESSORIES, slot, n, (0, 0, 0), progress)
         slot += 1
 
-MODS = {"guaranteed-drops": pirate_ring_100, "thief-gear": thief_gear}
+GAME_GOLD_GEAR = (752, 1573, 1832)  # Geo Blade, Bandit Armor, Miser Turban (+10 each)
+BANDIT_ARMOR = 1573         # the game's own (+10 gold), whose wearers the new armor copies
+BANDIT_WEARERS = sum(CHAR[c] for c in ("evan", "brandol", "carmyne", "titto", "ulk", "lutina"))
+SHOP_ARMOR = 1
+
+# The new body armor: name, the shop armor each is cloned from (its price,
+# its requirements, its shop and when it is sold), the bonus, the cut in
+# defense, which is the price of the bonus, and the description
+ARMORS = [
+    ("Highwayman's Garb", 1514, "Aura Armor", +20, 0.12, "Garb of a highway robber"),
+    ("Lupin's Vest", 1511, "Dark Armor", +30, 0.17, "Gentleman thief's vest"),
+]
+
+# Gold rings, for everyone, priced and sold as the drop-rate rings: name, bonus,
+# price, scenario progress when sold, text
+GOLD_RINGS = [
+    ("Cutpurse Ring", +10, 1200, 0, "Ring of a nimble cutpurse"),
+    ("Mugger's Ring", +15, 6000, 13100, "Ring of a back-alley robber"),
+    ("Lupin's Ring", +20, 12000, 14750, "Ring of a gentleman thief"),
+]
+GOLD_RING_SLOTS = 86        # after the six drop-rate rings, within slots 80-95
+GOLD_RING_IDS = (2021, 2047)  # apart from the drop-rate rings', leaving them room
+
+
+def gold_gear(p):
+    """Gold-rate body armor above the game's Bandit Armor, for the same six, and
+    rings for everyone: the killer's bonus raises the chance of the enemy's large
+    gold payout"""
+    e = p.equip(BANDIT_ARMOR)
+    assert p.data[e] == BANDIT_WEARERS and p.data[e + 0x15] == EFFECT_GOLD_RATE and p.s16(e + 0x16) == 10
+    for n in GAME_GOLD_GEAR:   # their text, as the new gold gear's
+        e = p.equip(n)
+        assert p.data[e + 0x15] == EFFECT_GOLD_RATE and p.s16(e + 0x16) == 10, "item %d isn't as read" % n
+        row = bytearray(p.data[p.item(n):p.item(n) + 32])
+        p.set_bonus_text(row, 10, EFFECT_GOLD_RATE)
+        p.data[p.item(n):p.item(n) + 32] = row
+    names = {p.item_name(n) for n in range(0x800) if p.data[p.item(n)]}
+    slot = 128
+    for name, ref, ref_name, bonus, cut, desc in ARMORS:
+        assert p.item_name(ref) == ref_name, "item %d isn't %s" % (ref, ref_name)
+        assert name not in names, name
+        _, reqs, progress = p.find_shop(SHOP_ARMOR, ref)
+        price = struct.unpack_from("<i", p.data, p.item(ref) + 4)[0]
+        defense = round(p.s16(p.equip(ref) + 4) * (1 - cut))
+        n = p.add_item(ref, 1633, 1640, name, "Body", desc, price, BANDIT_WEARERS, 0, bonus,
+                       defense, EFFECT_GOLD_RATE)
+        p.set_shop(SHOP_ARMOR, slot, n, reqs, progress)
+        slot += 1
+    slot = GOLD_RING_SLOTS
+    for name, bonus, price, progress, desc in GOLD_RINGS:
+        assert name not in names, name
+        n = p.add_item(RING_LIKE, *GOLD_RING_IDS, name, "Item", desc, price, 0xFF, 0, bonus, 0, EFFECT_GOLD_RATE)
+        p.set_shop(SHOP_ACCESSORIES, slot, n, (0, 0, 0), progress)
+        slot += 1
+
+
+def thief_gear(p):
+    """Both gear lines: item drop rate, then gold. The order fixes the new
+    items' ids, which saves hold"""
+    item_gear(p)
+    gold_gear(p)
+
+
+MODS = {"guaranteed-drops": pirate_ring_100, "thief-gear": thief_gear, "pirates-ring-text": pirate_ring_text}
 
 
 def build(iso, names, out):
