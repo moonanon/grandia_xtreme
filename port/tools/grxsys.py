@@ -260,10 +260,21 @@ ARMORS = [
     ("Lupin's Vest", 1511, "Dark Armor", +30, 0.17, "Gentleman thief's vest"),
 ]
 
+# Gold rings, for everyone, priced and sold as thief-gear's rings: name, bonus,
+# price, scenario progress when sold, text
+GOLD_RINGS = [
+    ("Cutpurse Ring", +10, 1200, 0, "A quick hand for coins"),
+    ("Turpin's Ring", +15, 6000, 13100, "Your money or your life"),
+    ("Lupin's Ring", +20, 12000, 14750, "Only the finest loot"),
+]
+GOLD_RING_SLOTS = 86        # after thief-gear's six, within slots 80-95
+GOLD_RING_IDS = (2021, 2047)  # clear of thief-gear's, so a save's rings stay the same with or without it
+
 
 def bandit_gear(p):
-    """Gold-rate body armor above the game's Bandit Armor, for the same six:
-    the killer's bonus raises the chance of the enemy's large gold payout"""
+    """Gold-rate body armor above the game's Bandit Armor, for the same six, and
+    rings for everyone: the killer's bonus raises the chance of the enemy's large
+    gold payout"""
     e = p.equip(BANDIT_ARMOR)
     assert p.data[e] == BANDIT_WEARERS and p.data[e + 0x15] == EFFECT_GOLD_RATE and p.s16(e + 0x16) == 10
     names = {p.item_name(n) for n in range(0x800) if p.data[p.item(n)]}
@@ -277,6 +288,12 @@ def bandit_gear(p):
         n = p.add_item(ref, 1633, 1640, name, "Body", desc, price, BANDIT_WEARERS, 0, bonus,
                        defense, EFFECT_GOLD_RATE)
         p.set_shop(SHOP_ARMOR, slot, n, reqs, progress)
+        slot += 1
+    slot = GOLD_RING_SLOTS
+    for name, bonus, price, progress, desc in GOLD_RINGS:
+        assert name not in names, name
+        n = p.add_item(RING_LIKE, *GOLD_RING_IDS, name, "Item", desc, price, 0xFF, 0, bonus, 0, EFFECT_GOLD_RATE)
+        p.set_shop(SHOP_ACCESSORIES, slot, n, (0, 0, 0), progress)
         slot += 1
 
 

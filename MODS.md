@@ -73,9 +73,23 @@ them, are unaffected.
 | Highwayman's Garb | +20 | 56 (Aura Armor's 64, less 12%) | 9200 | armor shop, with Aura Armor |
 | Lupin's Vest | +30 | 73 (Dark Armor's 88, less 17%) | 20000 | armor shop, with Dark Armor |
 
-Evan, Brandol, Carmyne, Titto, Ulk and Lutina can wear them, as Bandit Armor.
-The new pieces keep none of the copied armor's other bonuses or effects. They
-stack with the game's Geo Blade and Miser Turban (+10 each).
+Evan, Brandol, Carmyne, Titto, Ulk and Lutina can wear the armor, as Bandit
+Armor. The new armor keeps none of the copied armor's other bonuses or effects.
+
+| Ring (everyone) | Gold bonus | Price |
+| --- | --- | --- |
+| Cutpurse Ring | +10 | 1200 |
+| Turpin's Ring | +15 | 6000 |
+| Lupin's Ring | +20 | 12000 |
+
+The rings are in the accessory shop, at the same stages as `thief-gear`'s. A
+character has one accessory slot, so a gold ring and a thief ring can't both be
+worn.
+
+All of it stacks, with the game's Geo Blade and Miser Turban (+10 each) and the
+gold skill (+2 a level). Lupin's Vest, Lupin's Ring and the skill at level 5
+give +60, as `thief-gear`'s best does for items. Evan, with the Geo Blade and
+Miser Turban too, gets +80.
 
 The game uses one roll for both drops, so item-rate gear takes the high rolls
 that would have given large gold: on an enemy with an item, enough of it cancels

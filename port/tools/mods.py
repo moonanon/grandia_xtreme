@@ -68,7 +68,8 @@ GRXSYS_MODS = [
          desc="drop-rate gear so Titto isn't the only thief: swords for Evan and Brandol, daggers for Lutina, "
               "rings for everyone (Titto's best, reaching 75 against the others' 50)"),
     dict(mod="bandit-gear",
-         desc="gold-rate body armor above Bandit Armor, for the same six: a better chance of large gold payouts"),
+         desc="gold-rate gear: body armor above Bandit Armor, for the same six, and rings for everyone, "
+              "for a better chance of large gold payouts"),
     dict(mod="guaranteed-drops",
          desc="Pirate's Ring and Thief Trick give +20% a level: at level 5 enemies always drop an item, "
               "and from the best items they have"),
